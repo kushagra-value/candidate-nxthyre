@@ -60,7 +60,7 @@ export const CandidateList = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="mb-4 text-sm text-gray-500"
+        className="mb-4 text-sm text-black-500"
       >
         Showing 1-{results.length} of {totalResults} candidates
       </motion.div>
