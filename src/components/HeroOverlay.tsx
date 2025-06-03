@@ -5,6 +5,7 @@ import { TagInput } from './ui/TagInput';
 import { Dropdown } from './ui/Dropdown';
 import { Button } from './ui/Button';
 import { useSearch } from '../context/SearchContext';
+import { SearchIcon } from 'lucide-react';
 
 interface HeroOverlayProps {
   onClose: () => void;
@@ -47,32 +48,63 @@ export const HeroOverlay = ({ onClose }: HeroOverlayProps) => {
     executeSearch();
     onClose();
   };
+  const containerVariants = {
+    initial: { opacity: 0 },
+    animate: { 
+      opacity: 1,
+      transition: { 
+        duration: 0.3, 
+        when: "beforeChildren", 
+        staggerChildren: 0.1 
+      }
+    },
+    exit: { 
+      opacity: 0,
+      transition: { 
+        duration: 0.2, 
+        when: "afterChildren", 
+        staggerChildren: 0.05, 
+        staggerDirection: -1 
+      }
+    }
+  };
+  const itemVariants = {
+    initial: { y: 20, opacity: 0 },
+    animate: { y: 0, opacity: 1, transition: { duration: 0.3 } },
+    exit: { y: 10, opacity: 0, transition: { duration: 0.2 } }
+  };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    <motion.div 
+      className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 px-4"
+      variants={containerVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.5, ease: [0.19, 1.0, 0.22, 1.0] }}
-        className="bg-gray-50 rounded-2xl shadow-2xl w-full max-w-2xl p-8 relative z-50"
+        className="bg-white rounded-xl shadow-2xl w-full max-w-xl p-6 md:p-8"
       >
-        <h1 className="hero-title text-3xl font-bold text-gray-800 mb-6 text-center">
-          Find your perfect candidate
-        </h1>
+        <motion.div variants={itemVariants} className="mb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-secondary-900 text-center">
+            Find your perfect candidate
+          </h1>
+        </motion.div>
+
+        
 
         <div className="space-y-6">
           <div className="hero-input relative z-30">
             <TagInput
-              label="Skills"
+              label="Required Skills"
               tags={searchParams.skills}
               onChange={(tags) => updateSearchParams({ skills: tags })}
-              placeholder="Select required skills..."
+              placeholder="Add skills (e.g., React, Python, AWS)"
               suggestions={skillOptions}
+              classNameSuggestions='border border-gray-300'
             />
           </div>
 
@@ -81,13 +113,14 @@ export const HeroOverlay = ({ onClose }: HeroOverlayProps) => {
               label="Location"
               tags={searchParams.location.split(',').filter(Boolean)}
               onChange={(locations) => updateSearchParams({ location: locations.join(',') })}
-              placeholder="Select locations..."
+              placeholder="City, State or Remote"
               suggestions={locationOptions}
+              classNameSuggestions="border border-gray-300"
             />
           </div>
 
           <div className="hero-input relative z-10">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Experience</label>
+            <label className="block text-sm font-medium text-gray-600 mb-2">Experience</label>
             <Dropdown
               options={experienceOptions}
               value={`${searchParams.experienceRange[1]} years`}
@@ -96,18 +129,21 @@ export const HeroOverlay = ({ onClose }: HeroOverlayProps) => {
                 updateSearchParams({ experienceRange: [0, years] });
               }}
               placeholder="Select experience..."
-              className="w-full"
+              className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               dropdownClassName="absolute top-full left-0 right-0 z-50 mt-1 max-h-60 overflow-auto bg-white border border-gray-300 rounded-md shadow-lg"
             />
           </div>
 
-          <div className="hero-button flex justify-center mt-8 relative z-0">
+          <div className="w-full pt-3 flex justify-left relative z-0">
             <Button
               size="lg"
               onClick={handleSearch}
-              className="w-full md:w-auto px-10 text-gray-800"
+              className="btn-primary w-full flex items-center justify-center py-3 text-base"
             >
-              Search
+              
+              <SearchIcon size={18} className="mr-2" />
+            
+              Search Candidates
             </Button>
           </div>
         </div>

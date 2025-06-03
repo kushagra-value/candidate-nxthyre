@@ -8,6 +8,8 @@ interface DropdownProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  classNameSuggestions?: string;
+  textSuggestions?: string;
   dropdownClassName?: string;
 }
 
@@ -17,6 +19,8 @@ export const Dropdown = ({
   onChange,
   placeholder = 'Select an option',
   className = '',
+  classNameSuggestions = '',
+  textSuggestions = '',
   dropdownClassName = ''
 }: DropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -45,10 +49,10 @@ export const Dropdown = ({
     <div ref={dropdownRef} className={`relative ${className}`}>
       <button
         type="button"
-        className="w-full flex justify-between items-center px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        className={`w-full flex justify-between items-center px-3 py-2 rounded-md bg-white text-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${classNameSuggestions}`}
         onClick={toggleDropdown}
       >
-        <span className={value ? 'text-gray-800' : 'text-gray-500'}>
+        <span className={` ${value ? 'text-gray-600' : 'text-gray-500 '} ${textSuggestions}`}>
           {value || placeholder}
         </span>
         <ChevronDown 

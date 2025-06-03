@@ -1,6 +1,6 @@
 import React, { useState, useRef, KeyboardEvent } from 'react';
 import { Tag } from './Tag';
-import { PlusCircle, X } from 'lucide-react';
+import { PlusCircle, X, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface TagInputProps {
@@ -8,6 +8,7 @@ interface TagInputProps {
   onChange: (tags: string[]) => void;
   placeholder?: string;
   className?: string;
+  classNameSuggestions?: string;
   suggestions?: string[];
   label?: string;
 }
@@ -17,11 +18,12 @@ export const TagInput = ({
   onChange,
   placeholder = 'Add a tag...',
   className = '',
+  classNameSuggestions = '',
   suggestions = [],
   label
 }: TagInputProps) => {
   const [inputValue, setInputValue] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); // New state for controlling suggestions dropdown
   const inputRef = useRef<HTMLInputElement>(null);
 
   const addTag = (tag: string) => {
@@ -55,23 +57,23 @@ export const TagInput = ({
   return (
     <div className={className}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-gray-600 mb-1">
           {label}
         </label>
       )}
       
       <div 
-        className="w-full border border-gray-300 rounded-md p-2 bg-white focus-within:ring-2 focus-within:ring-indigo-400 focus-within:border-transparent"
+        className={`w-full ${classNameSuggestions} rounded-md p-3 bg-white focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-all duration-200 shadow-sm`}
         onClick={() => inputRef.current?.focus()}
       >
-        <div className="flex flex-wrap gap-2 mb-2">
+        <div className="flex flex-wrap gap-2">
           <AnimatePresence>
             {tags.map((tag, index) => (
               <motion.div
                 key={tag}
-                initial={{ opacity: 0, scale: 0.8 }}
+                initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
+                exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.15 }}
               >
                 <Tag
@@ -90,12 +92,12 @@ export const TagInput = ({
             value={inputValue}
             onChange={(e) => {
               setInputValue(e.target.value);
-              setShowSuggestions(true);
+              setIsOpen(true); // Show suggestions when typing
             }}
-            onFocus={() => setShowSuggestions(true)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            onFocus={() => setIsOpen(true)} // Show suggestions on focus
+            onBlur={() => setTimeout(() => setIsOpen(false), 200)} // Hide suggestions after a delay
             onKeyDown={handleKeyDown}
-            className="flex-grow border-none p-1 focus:outline-none focus:ring-0 text-gray-800 placeholder:text-gray-400"
+            className="flex-grow border-none p-1 focus:outline-none focus:ring-0 text-gray-900 placeholder:text-gray-400 text-sm"
             placeholder={placeholder}
           />
           
@@ -103,7 +105,7 @@ export const TagInput = ({
             <button
               type="button"
               onClick={() => setInputValue('')}
-              className="p-1 text-gray-400 hover:text-gray-600"
+              className="p-1 text-gray-400 hover:text-gray-600 transition-colors duration-150"
             >
               <X size={16} />
             </button>
@@ -113,27 +115,40 @@ export const TagInput = ({
             <button
               type="button"
               onClick={() => addTag(inputValue)}
-              className="p-1 text-indigo-500 hover:text-indigo-700"
+              className="p-1 text-indigo-600 hover:text-indigo-800 transition-colors duration-150"
             >
               <PlusCircle size={18} />
             </button>
           )}
+          
+          <button
+            type="button"
+            onClick={() => setIsOpen(!isOpen)} // Toggle suggestions
+            className="p-1 text-gray-400 hover:text-gray-600 transition-colors duration-150"
+          >
+            <ChevronDown 
+              size={16} 
+              className={`transition-transform duration-200 ${isOpen ? 'transform rotate-180' : ''}`} 
+            />
+          </button>
         </div>
         
-        {/* Suggestions list */}
         <AnimatePresence>
-          {showSuggestions && filteredSuggestions.length > 0 && (
+          {isOpen && filteredSuggestions.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute z-10 left-0 right-0 mt-1 bg-white shadow-lg rounded-md max-h-48 overflow-auto"
+              className="absolute z-20 left-0 right-0 mt-2 bg-white shadow-lg rounded-md max-h-48 overflow-auto border border-gray-200"
             >
               {filteredSuggestions.map((suggestion) => (
                 <div
                   key={suggestion}
-                  className="px-3 py-2 text-sm cursor-pointer hover:bg-indigo-50 text-gray-700"
-                  onClick={() => addTag(suggestion)}
+                  className="px-4 py-2.5 text-sm cursor-pointer hover:bg-indigo-50 hover:text-indigo-700 text-gray-700 transition-colors duration-150"
+                  onClick={() => {
+                    addTag(suggestion);
+                    setIsOpen(false); // Close suggestions after selecting
+                  }}
                 >
                   {suggestion}
                 </div>
