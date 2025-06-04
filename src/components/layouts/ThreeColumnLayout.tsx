@@ -3,6 +3,7 @@ import { FilterSidebar } from '../filters/FilterSidebar';
 import { CandidateList } from '../candidates/CandidateList';
 import { SavedCandidatesSidebar } from '../sidebars/SavedCandidatesSidebar';
 import { useSearch } from '../../context/SearchContext';
+import { ChevronDown } from 'lucide-react';
 
 export const ThreeColumnLayout = () => {
   const { searchState } = useSearch();
@@ -12,10 +13,15 @@ export const ThreeColumnLayout = () => {
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
       {results.length > 0 && (
         <div className="mb-4 text-sm text-gray-500">
-          {results.length} results found
+          
           <div className="flex justify-end">
-            <div className="text-sm text-gray-600">
-              Sort By: <span className="font-medium">Date Posted</span>
+            <div className="text-sm text-gray-600 flex items-center space-x-2 gap-2">
+              Sort By: <button className="btn bg-gray-300/90 p-2 px-3 rounded-[10px] flex "><span> Date Posted 
+               </span> 
+               <ChevronDown 
+                  size={16} 
+                />
+        </button>
             </div>
           </div>
         </div>

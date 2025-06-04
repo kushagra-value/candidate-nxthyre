@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, ReactNode } from 'react';
+import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { SearchParams, SearchState, Candidate } from '../types';
 import { mockCandidates, mockFavorableCandidates } from '../data/mockData';
 
@@ -114,20 +114,22 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         totalResults: filteredResults.length,
         favorableCandidates: filteredFavorable
       }));
-    }, 1500);
+    }, 500); // Reduced timeout for better UX
   };
+
+  // Automatically trigger search when searchParams change
+  useEffect(() => {
+    executeSearch();
+  }, [searchParams]);
 
   const resetSearch = () => {
     setSearchParams(defaultSearchParams);
-    setSearchState(prev => ({
-      ...prev,
-      isSearching: false,
-      hasSearched: false,
+    setSearchState({
+      ...defaultSearchState,
       results: mockCandidates,
       totalResults: mockCandidates.length,
-      currentPage: 1,
       favorableCandidates: mockFavorableCandidates
-    }));
+    });
   };
 
   const saveCandidate = (candidate: Candidate) => {

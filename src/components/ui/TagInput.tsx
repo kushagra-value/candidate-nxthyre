@@ -139,7 +139,7 @@ export const TagInput = ({
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute z-20 left-0 right-0 mt-2 bg-white shadow-lg rounded-md max-h-48 overflow-auto border border-gray-200"
+              className="absolute z-20 left-0 right-0 mt-2 bg-white shadow-lg rounded-md max-w-50 max-h-48 overflow-auto border border-gray-200"
             >
               {filteredSuggestions.map((suggestion) => (
                 <div

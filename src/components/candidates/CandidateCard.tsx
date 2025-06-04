@@ -73,8 +73,8 @@
                 <span>₹{candidate.currentSalary} LPA</span>
               </div>
               
-              <div className="flex items-center text-gray-700">
-                <Clock size={16} className="mr-1 text-gray-500" />
+              <div className="flex items-center text-gray-500 mb-2">
+                <Clock size={16} className="mr-1 text-gray-500 " />
                 <span>{candidate.noticePeriod} days notice</span>
               </div>
             </div>
