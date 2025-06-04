@@ -80,12 +80,11 @@ class MongoFilter:
                 },
                 # Apply filters
                 {"$match": query},
-                # Add experience filter if provided
+                # Add experience filter if provided (greater than or equal to the specified value)
                 {
                     "$match": {
                         "total_experience_float": {
-                            "$gte": filters.get("experience", 0),
-                            "$lt": filters.get("experience", 0) + 1
+                            "$gte": filters.get("experience", 0)
                         } if filters.get("experience") is not None else {}
                     }
                 },
@@ -108,7 +107,7 @@ class MongoFilter:
         except Exception as e:
             print(f"Error fetching or saving data: {e}")
             raise
-        
+
     def get_data_by_id(self, resume_id: str) -> Optional[Dict[str, Any]]:
         """Fetch a single resume document by its ID."""
         if self.collection is None:

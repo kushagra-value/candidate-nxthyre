@@ -7,6 +7,7 @@ from bson import ObjectId
 from bson.errors import InvalidId
 from typing import Optional, Dict, Any
 from fastapi import HTTPException
+from db_rerank.match_and_rerank import semantic_search_and_rerank
 
 app = FastAPI()
 MongoDB_URI = "mongodb+srv://leena:leena123@cluster0.hinzr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
@@ -26,6 +27,7 @@ class FilterInput(BaseModel):
     locations: Optional[List[str]] = None
     experience: Optional[int] = None
     keywords: Optional[str] = None  # Added for frontend compatibility
+    user_nlp_text: Optional[str] = None  # Added for user input text
 
 @app.post("/filter-resumes/", response_model=List[Dict])
 async def filter_resumes(filters: FilterInput):
@@ -38,7 +40,7 @@ async def filter_resumes(filters: FilterInput):
     
     # Initialize MongoFilter
     mongo_filter = MongoFilter(uri)
-
+    print(filters)
     try:
         # Connect to MongoDB
         mongo_filter.connect()
@@ -47,14 +49,21 @@ async def filter_resumes(filters: FilterInput):
         filter_dict = filters.dict(exclude_unset=True)
 
         # Merge keywords into skills if provided
-        if filter_dict.get("keywords"):
-            keyword_list = [kw.strip() for kw in filter_dict["keywords"].split(",") if kw.strip()]
-            filter_dict["skills"] = (filter_dict.get("skills") or []) + keyword_list
-            del filter_dict["keywords"]  # Remove keywords from filter_dict
-
+        # if filter_dict.get("keywords"):
+        #     keyword_list = [kw.strip() for kw in filter_dict["keywords"].split(",") if kw.strip()]
+        #     filter_dict["skills"] = (filter_dict.get("skills") or []) + keyword_list
+            # del filter_dict["keywords"]  # Remove keywords from filter_dict
+        print(filter_dict)
         # Get filtered data
         results = mongo_filter.get_filtered_data(filter_dict)
-
+        print("yaha tk")
+    #   if not usertext==None:
+    #       result = akshy ka code run
+        if filter_dict["keywords"]:
+            # Here you can implement the logic to process user_nlp_text
+            # For now, we will just return the results as is
+            results = semantic_search_and_rerank(results, filter_dict["keywords"], top_k=20, rerank_top=20)
+            
         return results
 
     except Exception as e:
