@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MapPin, Phone, Mail, Github, Globe, Linkedin, FileText, Heart, Copy, CheckCircle, Briefcase, Plus, Edit, Trash2, X, Send, ChevronDown, Calendar, Clock, User, GraduationCap, Award } from 'lucide-react';
+import { ArrowLeft, MapPin, Phone, Mail, Github, Globe, Linkedin, FileText, Heart, Copy, CheckCircle, Briefcase, Plus, Edit, Trash2, X, Send, ChevronDown, Calendar, Clock, User, GraduationCap, Award, Bookmark } from 'lucide-react';
 import axios from 'axios';
 import { useSearch } from '../../context/SearchContext';
 
@@ -613,7 +613,7 @@ const CandidateDetailPage: React.FC = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Heart size={16} className={`mr-2 ${isSaved ? 'text-red-500' : ''}`} />
+                    <Bookmark size={16} className={`mr-2 ${isSaved ? 'text-red-500' : ''}`} />
                     {isSaved ? 'Unsave Candidate' : 'Save Candidate'}
                   </motion.button>
                 </motion.div>

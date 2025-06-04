@@ -7,6 +7,7 @@ import { Dropdown } from "./ui/Dropdown";
 import { useSearch } from "../context/SearchContext";
 import { noticePeriodOptions } from "../data/mockData";
 
+
 const skillOptions: Array<string> = [
   "NET", "AEM", "AI", "API", "AWS", "AWS EC2", "AWS-CWI", "Agentic Ai",
   "Agentic Workflows", "Agile", "Agile Methodology", "Aiml", "Algorithms",
@@ -79,7 +80,6 @@ export const Header = () => {
 
   const handleKeywordsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     updateSearchParams({ keywords: e.target.value });
-    executeSearch();
   };
 
   return (
@@ -168,6 +168,7 @@ export const Header = () => {
                 className="w-full md:w-3/4 bg-white rounded-lg px-3 py-2 shadow-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4f46e5] focus:border-transparent resize-y min-h-[80px] text-gray-800"
               />
             </div>
+
             <div className="mt-6 flex flex-wrap gap-3 items-center">
               <Button
                 variant="outline"

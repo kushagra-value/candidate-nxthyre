@@ -95,6 +95,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
 
   const executeSearch = async () => {
     setSearchState((prev) => ({ ...prev, isSearching: true }));
+    
 
     try {
       const filterInput = {
