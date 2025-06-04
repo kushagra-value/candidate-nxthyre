@@ -14,6 +14,7 @@ interface SearchContextType {
 
 const defaultSearchParams: SearchParams = {
   skills: [],
+  keywords: '',
   location: '',
   experienceRange: [0, 15],
   verifiedOnly: false,
@@ -69,7 +70,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
       // Filter by notice period
       if (searchParams.noticePeriod) {
         const days = parseInt(searchParams.noticePeriod);
-        if (candidate.noticePeriod > days) return false;
+        if (Number(candidate.noticePeriod) > days) return false;
       }
 
       // Filter by skills

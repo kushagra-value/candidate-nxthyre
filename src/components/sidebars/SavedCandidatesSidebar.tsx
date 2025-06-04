@@ -35,7 +35,7 @@ const CompactCandidateCard = ({ candidate, index }: CompactCandidateCardProps) =
 
 export const SavedCandidatesSidebar = () => {
   const { searchState } = useSearch();
-  const { savedCandidates, favorableCandidates } = searchState;
+  const { favorableCandidates } = searchState;
 
   return (
     <motion.aside
@@ -44,40 +44,6 @@ export const SavedCandidatesSidebar = () => {
       transition={{ duration: 0.5 }}
       className="bg-white rounded-lg shadow-md p-4 h-[calc(100vh-7rem)] overflow-y-auto sticky top-28"
     >
-      {/* Saved Candidates */}
-      <div className="mb-8">
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">
-          Saved Candidates ({savedCandidates.length})
-        </h2>
-        
-        <AnimatePresence>
-          {savedCandidates.length === 0 ? (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-sm text-gray-500 italic"
-            >
-              No saved candidates yet
-            </motion.p>
-          ) : (
-            <div className="space-y-2">
-              {savedCandidates.slice(0, 4).map((candidate, index) => (
-                <CompactCandidateCard
-                  key={candidate.id}
-                  candidate={candidate}
-                  index={index}
-                />
-              ))}
-              
-              {savedCandidates.length > 4 && (
-                <button className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
-                  Show {savedCandidates.length - 4} more
-                </button>
-              )}
-            </div>
-          )}
-        </AnimatePresence>
-      </div>
       
       {/* Favorable Candidates */}
       <div>

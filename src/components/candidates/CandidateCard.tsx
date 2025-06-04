@@ -1,28 +1,30 @@
-  import React from 'react';
-  import { MapPin, Briefcase, IndianRupee, Clock, Bookmark } from 'lucide-react';
-  import { motion } from 'framer-motion';
-  import { Button } from '../ui/Button';
-  import { Tag } from '../ui/Tag';
-  import { Candidate } from '../../types';
-  import { useSearch } from '../../context/SearchContext';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { MapPin, Briefcase, IndianRupee, Clock, Bookmark } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Button } from '../ui/Button';
+import { Tag } from '../ui/Tag';
+import { Candidate } from '../../types';
+import { useSearch } from '../../context/SearchContext';
 
-  interface CandidateCardProps {
-    candidate: Candidate;
-    index: number;
-  }
+interface CandidateCardProps {
+  candidate: Candidate;
+  index: number;
+}
 
-  export const CandidateCard = ({ candidate, index }: CandidateCardProps) => {
-    const { saveCandidate, searchState } = useSearch();
-    const isSaved = searchState.savedCandidates.some(c => c.id === candidate.id);
-    
-    const handleSave = () => {
-      saveCandidate(candidate);
-    };
+export const CandidateCard = ({ candidate, index }: CandidateCardProps) => {
+  const { saveCandidate, searchState } = useSearch();
+  const isSaved = searchState.savedCandidates.some(c => c.id === candidate.id);
+  
+  const handleSave = () => {
+    saveCandidate(candidate);
+  };
 
-    const displayedSkills = candidate.skills.slice(0, 3);
-    const remainingSkills = candidate.skills.length - 3;
+  const displayedSkills = candidate.skills.slice(0, 3);
+  const remainingSkills = candidate.skills.length - 3;
 
-    return (
+  return (
+    <Link to={`/candidate/${candidate.id}`} className="block">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -97,7 +99,11 @@
           <Button
             variant={isSaved ? 'primary' : 'outline'}
             leftIcon={<Bookmark size={16} className={isSaved ? 'text-white' : 'text-indigo-500'} />}
-            onClick={handleSave}
+            onClick={(e) => {
+              e.preventDefault(); // Prevent navigation when clicking Save button
+              e.stopPropagation(); // Stop event from bubbling to Link
+              handleSave();
+            }}
             disabled={isSaved}
             className="text-gray-800"
           >
@@ -105,5 +111,6 @@
           </Button>
         </div>
       </motion.div>
-    );
-  };
+    </Link>
+  );
+};
