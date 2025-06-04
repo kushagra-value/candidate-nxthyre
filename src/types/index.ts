@@ -6,10 +6,10 @@ export interface Candidate {
   contactInfo: { phone: string; email: string };
   socialLinks: { github?: string; portfolio?: string; linkedin?: string };
   experience: number; // Maps to total_experience
-  isVerified: boolean;
-  isTopTier: boolean;
-  professionalSummary: string;
-  skills: string[]; // Maps to core_technical_skills_claimed (split by commas)
+  isVerified: boolean; // Default false if not in DB
+  isTopTier: boolean; // Default false if not in DB
+  professionalSummary: string; // Default empty if not in DB
+  skills: string[]; // Maps to core_technical_skills_claimed
   experienceDetails: Array<{
     id: string;
     role: string;
@@ -46,8 +46,8 @@ export interface Candidate {
     date: string;
     description: string;
   }>;
-  noticePeriod: string;
-  currentSalary?: string;
+  noticePeriod: string; // Maps to notice_period
+  currentSalary?: string; // Maps to current_ctc
 }
 
 export interface Note {

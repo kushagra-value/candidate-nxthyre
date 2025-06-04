@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, MapPin, Phone, Mail, Github, Globe, Linkedin, FileText, Heart, Copy, CheckCircle, Briefcase, Plus, Edit, Trash2, X, Send, ChevronDown, Calendar, Clock, User, GraduationCap, Award } from 'lucide-react';
+import axios from 'axios';
+import { useSearch } from '../../context/SearchContext';
 
-// Mock data (replace with actual data source or props)
+// Interface definitions remain unchanged
 interface Candidate {
   id: string;
   name: string;
@@ -102,65 +104,7 @@ interface SavedList {
   candidates: string[];
 }
 
-const mockCandidates: Candidate[] = [
-  // Sample candidate data
-  {
-    id: '1',
-    name: 'John Doe',
-    profileImage: 'https://via.placeholder.com/150',
-    location: 'New York, NY',
-    contactInfo: { phone: '123-456-7890', email: 'john.doe@example.com' },
-    socialLinks: { github: 'https://github.com/johndoe', linkedin: 'https://linkedin.com/in/johndoe', portfolio: 'https://johndoe.com' },
-    experienceYears: 5,
-    isVerified: true,
-    isTopTier: true,
-    professionalSummary: 'Experienced full-stack developer with a passion for building scalable web applications.',
-    skills: ['React', 'Node.js', 'TypeScript'],
-    experience: [
-      {
-        id: 'exp1',
-        role: 'Senior Developer',
-        company: 'Tech Corp',
-        startDate: '2020-01',
-        isCurrent: true,
-        description: 'Led development of core product features.',
-        isVerified: true
-      }
-    ],
-    education: [
-      {
-        id: 'edu1',
-        degree: 'B.S.',
-        field: 'Computer Science',
-        institution: 'MIT',
-        startYear: '2015',
-        endYear: '2019',
-        grade: '3.8 GPA',
-        isVerified: true
-      }
-    ],
-    certifications: [
-      {
-        id: 'cert1',
-        name: 'AWS Certified Developer',
-        issuer: 'Amazon',
-        issueDate: '2022-06',
-        isVerified: true
-      }
-    ],
-    awards: [
-      {
-        id: 'award1',
-        title: 'Employee of the Year',
-        issuer: 'Tech Corp',
-        date: '2022-12',
-        description: 'Recognized for outstanding contributions.'
-      }
-    ],
-    noticePeriod: '2 weeks'
-  }
-];
-
+// Mock data for notes, emails, templates, interviews (unchanged)
 const mockNotes: Note[] = [
   {
     id: 'note1',
@@ -254,7 +198,7 @@ const mockInterviews: Interview[] = [
 const CandidateDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [candidates] = useState<Candidate[]>(mockCandidates);
+  const { saveCandidate, unsaveCandidate, searchState } = useSearch();
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [savedLists, setSavedLists] = useState<SavedList[]>([
@@ -274,18 +218,69 @@ const CandidateDetailPage: React.FC = () => {
   const [interviews] = useState<Interview[]>(mockInterviews);
   const [showFeedback, setShowFeedback] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState<'overview' | 'emails' | 'interviews'>('overview');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const isSaved = searchState.savedCandidates.some(c => c.id === id);
 
-  // Find the candidate
-  const candidate = candidates.find(c => c.id === id);
-
+  // Fetch candidate data from API
   useEffect(() => {
-    if (candidate) {
-      setSelectedCandidate(candidate);
-    }
-    return () => {
-      setSelectedCandidate(null);
+    const fetchCandidate = async () => {
+      if (!id) {
+        setError('Invalid candidate ID');
+        setLoading(false);
+        return;
+      }
+      try {
+        const response = await axios.get(`http://localhost:8000/resume/${id}`);
+        const doc = response.data;
+        const mappedCandidate: Candidate = {
+          id: doc._id,
+          name: doc.name || 'Unknown',
+          profileImage: doc.profilePicture || 'https://via.placeholder.com/150',
+          location: doc.preferred_location || 'Unknown',
+          contactInfo: {
+            phone: doc.phone || 'N/A',
+            email: doc.email || 'N/A',
+          },
+          socialLinks: {
+            github: doc.github !== 'NA' ? doc.github : undefined,
+            portfolio: doc.portfolio_website !== 'NA' ? doc.portfolio_website : undefined,
+            linkedin: doc.linkedin !== 'NA' ? doc.linkedin : undefined,
+          },
+          experienceYears: doc.total_experience || 0,
+          isVerified: doc.is_email_verified || false,
+          isTopTier: doc.last_graduation_university_tier === 'TOP' || false,
+          professionalSummary: doc.professionalSummary || 'No summary provided',
+          skills: doc.core_technical_skills_claimed
+            ? doc.core_technical_skills_claimed.split(',').map((s: string) => s.trim())
+            : [],
+          experience: doc.experienceDetails || [],
+          education: doc.last_graduation_degree
+            ? [{
+                id: doc._id,
+                degree: doc.last_graduation_degree,
+                field: doc.specialization || 'N/A',
+                institution: doc.last_graduation_university || 'N/A',
+                startYear: doc.last_graduation_year ? doc.last_graduation_year.toString() : 'N/A',
+                endYear: doc.last_graduation_year ? doc.last_graduation_year.toString() : 'N/A',
+                grade: undefined,
+                isVerified: doc.educational_backgroud_verification === 'verified',
+              }]
+            : [],
+          certifications: doc.certifcations_claimed || [],
+          awards: doc.awards || [],
+          noticePeriod: doc.notice_period || 'N/A',
+        };
+        setSelectedCandidate(mappedCandidate);
+      } catch (err: any) {
+        setError(err.response?.data?.detail || 'Failed to fetch candidate details');
+      } finally {
+        setLoading(false);
+      }
     };
-  }, [candidate]);
+
+    fetchCandidate();
+  }, [id]);
 
   // NotesPanel logic
   const handleSaveNote = () => {
@@ -386,6 +381,27 @@ const CandidateDetailPage: React.FC = () => {
           : list
       )
     );
+    if (selectedCandidate) {
+      saveCandidate({
+        id: selectedCandidate.id,
+        name: selectedCandidate.name,
+        profilePicture: selectedCandidate.profileImage,
+        location: selectedCandidate.location,
+        contactInfo: selectedCandidate.contactInfo,
+        socialLinks: selectedCandidate.socialLinks,
+        experience: selectedCandidate.experienceYears,
+        isVerified: selectedCandidate.isVerified,
+        isTopTier: selectedCandidate.isTopTier,
+        professionalSummary: selectedCandidate.professionalSummary,
+        skills: selectedCandidate.skills,
+        experienceDetails: selectedCandidate.experience,
+        education: selectedCandidate.education,
+        certifications: selectedCandidate.certifications,
+        awards: selectedCandidate.awards,
+        noticePeriod: selectedCandidate.noticePeriod,
+        currentSalary: undefined, // Not used in this interface
+      });
+    }
   };
 
   const createNewList = (name: string, candidateId: string) => {
@@ -395,16 +411,49 @@ const CandidateDetailPage: React.FC = () => {
       candidates: [candidateId]
     };
     setSavedLists(prev => [...prev, newList]);
+    if (selectedCandidate) {
+      saveCandidate({
+        id: selectedCandidate.id,
+        name: selectedCandidate.name,
+        profilePicture: selectedCandidate.profileImage,
+        location: selectedCandidate.location,
+        contactInfo: selectedCandidate.contactInfo,
+        socialLinks: selectedCandidate.socialLinks,
+        experience: selectedCandidate.experienceYears,
+        isVerified: selectedCandidate.isVerified,
+        isTopTier: selectedCandidate.isTopTier,
+        professionalSummary: selectedCandidate.professionalSummary,
+        skills: selectedCandidate.skills,
+        experienceDetails: selectedCandidate.experience,
+        education: selectedCandidate.education,
+        certifications: selectedCandidate.certifications,
+        awards: selectedCandidate.awards,
+        noticePeriod: selectedCandidate.noticePeriod,
+        currentSalary: undefined,
+      });
+    }
   };
 
-  if (!candidate) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-secondary-50 flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+          <div className="text-6xl mb-4">⏳</div>
+          <h2 className="text-2xl font-semibold mb-4">Loading Candidate Details</h2>
+          <p className="text-secondary-600 mb-6">Please wait while we fetch the candidate information...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !selectedCandidate) {
     return (
       <div className="min-h-screen bg-secondary-50 flex items-center justify-center">
         <div className="bg-white rounded-lg shadow-lg p-8 text-center">
           <div className="text-6xl mb-4">🔍</div>
           <h2 className="text-2xl font-semibold mb-4">Candidate Not Found</h2>
           <p className="text-secondary-600 mb-6">
-            The candidate you're looking for doesn't exist or has been removed.
+            {error || "The candidate you're looking for doesn't exist or has been removed."}
           </p>
           <button
             className="btn-primary"
@@ -462,16 +511,16 @@ const CandidateDetailPage: React.FC = () => {
                   animate={{ y: 0, opacity: 1 }}
                 >
                   <img
-                    src={candidate.profileImage}
-                    alt={candidate.name}
+                    src={selectedCandidate.profileImage}
+                    alt={selectedCandidate.name}
                     className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-secondary-100"
                   />
-                  {candidate.isVerified && (
+                  {selectedCandidate.isVerified && (
                     <div className="absolute bottom-0 right-0 bg-primary-500 text-white rounded-full p-1.5">
                       <CheckCircle size={16} />
                     </div>
                   )}
-                  {candidate.isTopTier && (
+                  {selectedCandidate.isTopTier && (
                     <div className="absolute top-0 right-0 bg-warning-500 text-white rounded-full p-1.5">
                       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
@@ -484,17 +533,17 @@ const CandidateDetailPage: React.FC = () => {
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                 >
-                  <h2 className="text-2xl font-bold">{candidate.name}</h2>
+                  <h2 className="text-2xl font-bold">{selectedCandidate.name}</h2>
                   <div className="flex items-center text-secondary-600 mt-1">
                     <MapPin size={16} className="mr-1" />
-                    <span>{candidate.location}</span>
+                    <span>{selectedCandidate.location}</span>
                   </div>
                   <div className="flex flex-wrap mt-3 gap-3">
                     <div className="flex items-center text-secondary-700">
                       <Phone size={16} className="mr-1" />
-                      <span>{candidate.contactInfo.phone}</span>
+                      <span>{selectedCandidate.contactInfo.phone}</span>
                       <button
-                        onClick={() => navigator.clipboard.writeText(candidate.contactInfo.phone)}
+                        onClick={() => navigator.clipboard.writeText(selectedCandidate.contactInfo.phone)}
                         className="ml-1 text-secondary-500 hover:text-secondary-700"
                       >
                         <Copy size={14} />
@@ -502,13 +551,13 @@ const CandidateDetailPage: React.FC = () => {
                     </div>
                     <div className="flex items-center text-secondary-700">
                       <Mail size={16} className="mr-1" />
-                      <span>{candidate.contactInfo.email}</span>
+                      <span>{selectedCandidate.contactInfo.email}</span>
                     </div>
                   </div>
                   <div className="mt-3">
                     <span className="bg-secondary-100 text-secondary-800 px-2 py-1 rounded text-sm inline-flex items-center">
                       <Briefcase size={14} className="mr-1" />
-                      {candidate.experienceYears} years experience
+                      {selectedCandidate.experienceYears} years experience
                     </span>
                   </div>
                 </motion.div>
@@ -518,9 +567,9 @@ const CandidateDetailPage: React.FC = () => {
                   animate={{ y: 0, opacity: 1 }}
                 >
                   <div className="flex gap-2">
-                    {candidate.socialLinks.github && (
+                    {selectedCandidate.socialLinks.github && (
                       <a
-                        href={candidate.socialLinks.github}
+                        href={selectedCandidate.socialLinks.github}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="bg-secondary-100 p-2 rounded-full text-secondary-700 hover:bg-secondary-200"
@@ -528,9 +577,9 @@ const CandidateDetailPage: React.FC = () => {
                         <Github size={18} />
                       </a>
                     )}
-                    {candidate.socialLinks.portfolio && (
+                    {selectedCandidate.socialLinks.portfolio && (
                       <a
-                        href={candidate.socialLinks.portfolio}
+                        href={selectedCandidate.socialLinks.portfolio}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="bg-secondary-100 p-2 rounded-full text-secondary-700 hover:bg-secondary-200"
@@ -538,9 +587,9 @@ const CandidateDetailPage: React.FC = () => {
                         <Globe size={18} />
                       </a>
                     )}
-                    {candidate.socialLinks.linkedin && (
+                    {selectedCandidate.socialLinks.linkedin && (
                       <a
-                        href={candidate.socialLinks.linkedin}
+                        href={selectedCandidate.socialLinks.linkedin}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="bg-secondary-100 p-2 rounded-full text-secondary-700 hover:bg-secondary-200"
@@ -554,12 +603,18 @@ const CandidateDetailPage: React.FC = () => {
                   </div>
                   <motion.button
                     className="btn-primary flex items-center"
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={() => {
+                      if (isSaved) {
+                        unsaveCandidate(selectedCandidate.id);
+                      } else {
+                        setIsModalOpen(true);
+                      }
+                    }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Heart size={16} className="mr-2" />
-                    Save Candidate
+                    <Heart size={16} className={`mr-2 ${isSaved ? 'text-red-500' : ''}`} />
+                    {isSaved ? 'Unsave Candidate' : 'Save Candidate'}
                   </motion.button>
                 </motion.div>
               </div>
@@ -606,12 +661,12 @@ const CandidateDetailPage: React.FC = () => {
                       <div className="space-y-8">
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                           <h3 className="text-lg font-semibold mb-3">Professional Summary</h3>
-                          <p className="text-secondary-700">{candidate.professionalSummary}</p>
+                          <p className="text-secondary-700">{selectedCandidate.professionalSummary}</p>
                         </motion.div>
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                           <h3 className="text-lg font-semibold mb-3">Skills</h3>
                           <div className="flex flex-wrap gap-2">
-                            {candidate.skills.map((skill, index) => (
+                            {selectedCandidate.skills.map((skill, index) => (
                               <span key={index} className="tag-primary">{skill}</span>
                             ))}
                           </div>
@@ -619,7 +674,7 @@ const CandidateDetailPage: React.FC = () => {
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                           <h3 className="text-lg font-semibold mb-3">Experience</h3>
                           <div className="space-y-4">
-                            {candidate.experience.map((exp) => (
+                            {selectedCandidate.experience.map((exp) => (
                               <div key={exp.id} className="flex">
                                 <div className="flex-shrink-0 mt-1">
                                   <div className="w-10 h-10 rounded-full bg-secondary-100 flex items-center justify-center">
@@ -646,7 +701,7 @@ const CandidateDetailPage: React.FC = () => {
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                           <h3 className="text-lg font-semibold mb-3">Education</h3>
                           <div className="space-y-4">
-                            {candidate.education.map((edu) => (
+                            {selectedCandidate.education.map((edu) => (
                               <div key={edu.id} className="flex">
                                 <div className="flex-shrink-0 mt-1">
                                   <div className="w-10 h-10 rounded-full bg-secondary-100 flex items-center justify-center">
@@ -672,15 +727,15 @@ const CandidateDetailPage: React.FC = () => {
                             ))}
                           </div>
                         </motion.div>
-                        {candidate.certifications.length > 0 && (
+                        {selectedCandidate.certifications.length > 0 && (
                           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                             <h3 className="text-lg font-semibold mb-3">Certifications</h3>
                             <div className="space-y-3">
-                              {candidate.certifications.map((cert) => (
+                              {selectedCandidate.certifications.map((cert) => (
                                 <div key={cert.id} className="flex">
                                   <div className="flex-shrink-0 mt-1">
                                     <div className="w-10 h-10 rounded-full bg-secondary-100 flex items-center justify-center">
-                                     {/* l <CertificateIcon size={18} className="text-secondary-700" /> */}
+                                      {/* <CertificateIcon size={18} className="text-secondary-700" /> */}
                                     </div>
                                   </div>
                                   <div className="ml-4">
@@ -706,11 +761,11 @@ const CandidateDetailPage: React.FC = () => {
                             </div>
                           </motion.div>
                         )}
-                        {candidate.awards.length > 0 && (
+                        {selectedCandidate.awards.length > 0 && (
                           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                             <h3 className="text-lg font-semibold mb-3">Awards</h3>
                             <div className="space-y-3">
-                              {candidate.awards.map((award) => (
+                              {selectedCandidate.awards.map((award) => (
                                 <div key={award.id} className="flex">
                                   <div className="flex-shrink-0 mt-1">
                                     <div className="w-10 h-10 rounded-full bg-secondary-100 flex items-center justify-center">
@@ -1080,7 +1135,7 @@ const CandidateDetailPage: React.FC = () => {
                 <label className="block text-sm font-medium text-secondary-700 mb-1">Select List</label>
                 <select
                   className="input"
-                  onChange={(e) => addCandidateToList(candidate.id, e.target.value)}
+                  onChange={(e) => addCandidateToList(selectedCandidate.id, e.target.value)}
                 >
                   <option value="">Select a list</option>
                   {savedLists.map((list) => (
@@ -1096,7 +1151,7 @@ const CandidateDetailPage: React.FC = () => {
                   placeholder="New list name"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                      createNewList(e.currentTarget.value.trim(), candidate.id);
+                      createNewList(e.currentTarget.value.trim(), selectedCandidate.id);
                       e.currentTarget.value = '';
                       setIsModalOpen(false);
                     }

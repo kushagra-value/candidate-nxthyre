@@ -1,6 +1,6 @@
 import { createContext, useState, useContext, ReactNode } from 'react';
+import axios from 'axios';
 import { SearchParams, SearchState, Candidate } from '../types';
-import { mockCandidates, mockFavorableCandidates } from '../data/mockData';
 
 interface SearchContextType {
   searchParams: SearchParams;
@@ -26,7 +26,7 @@ const defaultSearchParams: SearchParams = {
     email: false,
     linkedin: false,
     employment: false,
-    education: false
+    education: false,
   },
   employmentGaps: false,
   graduationYearRange: [2010, 2024],
@@ -36,17 +36,17 @@ const defaultSearchParams: SearchParams = {
   hasAwards: false,
   hasSocialProof: false,
   currentSalaryRange: [],
-  expectedCTCRange: []
+  expectedCTCRange: [],
 };
 
 const defaultSearchState: SearchState = {
   isSearching: false,
   hasSearched: false,
-  results: mockCandidates,
-  totalResults: mockCandidates.length,
+  results: [],
+  totalResults: 0,
   currentPage: 1,
   savedCandidates: [],
-  favorableCandidates: mockFavorableCandidates
+  favorableCandidates: [],
 };
 
 export const SearchContext = createContext<SearchContextType | undefined>(undefined);
@@ -56,102 +56,131 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
   const [searchState, setSearchState] = useState<SearchState>(defaultSearchState);
 
   const updateSearchParams = (params: Partial<SearchParams>) => {
-    setSearchParams(prev => ({ ...prev, ...params }));
+    setSearchParams((prev) => ({ ...prev, ...params }));
   };
 
-  const filterCandidates = (candidates: Candidate[]) => {
-    return candidates.filter(candidate => {
-      // Filter by verified status
-      if (searchParams.verifiedOnly && !candidate.isVerified) return false;
+  const executeSearch = async () => {
+    setSearchState((prev) => ({ ...prev, isSearching: true }));
 
-      // Filter by top tier status
-      if (searchParams.topTierOnly && !candidate.isTopTier) return false;
+    try {
+      const filterInput = {
+        skills: searchParams.skills.length > 0 ? searchParams.skills : undefined,
+        locations: searchParams.location ? searchParams.location.split(',').map((loc) => loc.trim()) : undefined,
+        experience: searchParams.experienceRange[1] > 0 ? searchParams.experienceRange[1] : undefined,
+        keywords: searchParams.keywords || undefined,
+      };
 
-      // Filter by notice period
-      if (searchParams.noticePeriod) {
-        const days = parseInt(searchParams.noticePeriod);
-        if (Number(candidate.noticePeriod) > days) return false;
-      }
+      const response = await axios.post('http://localhost:8000/filter-resumes/', filterInput, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-      // Filter by skills
-      if (searchParams.skills.length > 0) {
-        const hasAllSkills = searchParams.skills.every(skill =>
-          candidate.skills.includes(skill)
-        );
-        if (!hasAllSkills) return false;
-      }
+      const candidates: Candidate[] = response.data.map((doc: any) => ({
+        id: doc._id,
+        name: doc.name || 'Unknown',
+        profilePicture: doc.profilePicture || 'https://via.placeholder.com/150',
+        location: doc.preferred_location || 'Unknown',
+        contactInfo: {
+          phone: doc.phone || 'N/A',
+          email: doc.email || 'N/A',
+        },
+        socialLinks: {
+          github: doc.github !== 'NA' ? doc.github : undefined,
+          portfolio: doc.portfolio_website !== 'NA' ? doc.portfolio_website : undefined,
+          linkedin: doc.linkedin !== 'NA' ? doc.linkedin : undefined,
+        },
+        experience: doc.total_experience || 0,
+        isVerified: doc.is_email_verified || false,
+        isTopTier: doc.last_graduation_university_tier === 'TOP' || false,
+        professionalSummary: doc.professionalSummary || '',
+        skills: doc.core_technical_skills_claimed
+          ? doc.core_technical_skills_claimed.split(',').map((s: string) => s.trim())
+          : [],
+        experienceDetails: doc.experienceDetails || [],
+        education: doc.last_graduation_degree
+          ? [{
+              id: doc._id,
+              degree: doc.last_graduation_degree,
+              field: doc.specialization || 'N/A',
+              institution: doc.last_graduation_university || 'N/A',
+              startYear: doc.last_graduation_year ? doc.last_graduation_year.toString() : 'N/A',
+              endYear: doc.last_graduation_year ? doc.last_graduation_year.toString() : 'N/A',
+              isVerified: doc.educational_backgroud_verification === 'verified',
+            }]
+          : [],
+        certifications: doc.certifcations_claimed || [],
+        awards: doc.awards || [],
+        noticePeriod: doc.notice_period || 'N/A',
+        currentSalary: doc.current_ctc || 'N/A',
+      }));
 
-      // Filter by location
-      if (searchParams.location) {
-        const locations = searchParams.location.split(',').filter(Boolean);
-        if (locations.length > 0 && !locations.includes(candidate.location.split(',')[0].trim())) {
-          return false;
+      const filteredCandidates = candidates.filter((candidate) => {
+        if (searchParams.verifiedOnly && !candidate.isVerified) return false;
+        if (searchParams.topTierOnly && !candidate.isTopTier) return false;
+        if (searchParams.noticePeriod) {
+          const days = parseInt(searchParams.noticePeriod.replace(/\D/g, '')) || 0;
+          const candidateDays = parseInt(candidate.noticePeriod.replace(/\D/g, '')) || 0;
+          if (candidateDays > days) return false;
         }
-      }
+        return true;
+      });
 
-      // Filter by experience
-      if (candidate.experience < searchParams.experienceRange[0] ||
-          candidate.experience > searchParams.experienceRange[1]) {
-        return false;
-      }
-
-      return true;
-    });
-  };
-
-  const executeSearch = () => {
-    setSearchState(prev => ({ ...prev, isSearching: true }));
-    
-    // Simulate API call with setTimeout
-    setTimeout(() => {
-      const filteredResults = filterCandidates(mockCandidates);
-      const filteredFavorable = filterCandidates(mockFavorableCandidates);
-      
-      setSearchState(prev => ({
+      setSearchState((prev) => ({
         ...prev,
         isSearching: false,
         hasSearched: true,
-        results: filteredResults,
-        totalResults: filteredResults.length,
-        favorableCandidates: filteredFavorable
+        results: filteredCandidates,
+        totalResults: filteredCandidates.length,
+        favorableCandidates: filteredCandidates.slice(0, 5),
       }));
-    }, 1500);
+    } catch (error) {
+      console.error('Error fetching candidates:', error);
+      setSearchState((prev) => ({
+        ...prev,
+        isSearching: false,
+        hasSearched: true,
+        results: [],
+        totalResults: 0,
+        favorableCandidates: [],
+      }));
+    }
   };
 
   const resetSearch = () => {
     setSearchParams(defaultSearchParams);
-    setSearchState(prev => ({
+    setSearchState((prev) => ({
       ...prev,
       isSearching: false,
       hasSearched: false,
-      results: mockCandidates,
-      totalResults: mockCandidates.length,
+      results: [],
+      totalResults: 0,
       currentPage: 1,
-      favorableCandidates: mockFavorableCandidates
+      favorableCandidates: [],
     }));
   };
 
   const saveCandidate = (candidate: Candidate) => {
-    setSearchState(prev => {
-      if (prev.savedCandidates.some(c => c.id === candidate.id)) {
+    setSearchState((prev) => {
+      if (prev.savedCandidates.some((c) => c.id === candidate.id)) {
         return prev;
       }
       return {
         ...prev,
-        savedCandidates: [...prev.savedCandidates, candidate]
+        savedCandidates: [...prev.savedCandidates, candidate],
       };
     });
   };
 
   const unsaveCandidate = (candidateId: string) => {
-    setSearchState(prev => ({
+    setSearchState((prev) => ({
       ...prev,
-      savedCandidates: prev.savedCandidates.filter(c => c.id !== candidateId)
+      savedCandidates: prev.savedCandidates.filter((c) => c.id !== candidateId),
     }));
   };
 
   return (
-    <SearchContext.Provider 
+    <SearchContext.Provider
       value={{
         searchParams,
         searchState,
@@ -159,7 +188,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         executeSearch,
         resetSearch,
         saveCandidate,
-        unsaveCandidate
+        unsaveCandidate,
       }}
     >
       {children}
