@@ -48,6 +48,9 @@ export interface Candidate {
   }>;
   noticePeriod: string;
   currentSalary?: string;
+  university: string;
+  company: string;
+  position: string;
 }
 
 export interface Note {

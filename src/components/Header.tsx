@@ -60,42 +60,45 @@ const experienceOptions: string[] = Array.from(
 );
 
 export const Header = () => {
-  const { searchParams, updateSearchParams, executeSearch, resetSearch } = useSearch();
+  const { searchParams, updateSearchParams, resetSearch } = useSearch();
 
   const handleNoticePeriodChange = (value: string) => {
     updateSearchParams({ noticePeriod: value });
-    executeSearch();
   };
 
   const toggleVerifiedOnly = () => {
     updateSearchParams({ verifiedOnly: !searchParams.verifiedOnly });
-    executeSearch();
   };
 
   const toggleTopTierOnly = () => {
     updateSearchParams({ topTierOnly: !searchParams.topTierOnly });
-    executeSearch();
   };
 
   const handleKeywordsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     updateSearchParams({ keywords: e.target.value });
-    executeSearch();
   };
 
   return (
+    <>
     <motion.header
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-gradient-to-r from-[#1d1e3a] to-[#2a2b5a] text-white py-6 px-4 md:px-8 shadow-lg"
+      className="bg-[#1d1e3a] text-white py-4 px-4 md:px-8"
     >
+
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row items-center justify-between mb-6">
-          <div className="text-2xl font-bold flex items-center">
-            Recruit Pro
-            <span className="animate-[blink_2s_infinite] ml-1">_</span>
+
+        <div className="flex items-center justify-between mb-4">
+          <div className="">
+            <img
+              src="/assets/logo2.png"
+              alt="logo"
+              className="w-24 object-fit  "
+            />
           </div>
-          <div className="flex items-center space-x-3 mt-4 md:mt-0">
+
+          <div className="flex items-center space-x-3">
             <Button
               variant="outline"
               className="border border-white text-white hover:bg-white hover:text-[#1d1e3a] transition-colors duration-300"
@@ -107,26 +110,25 @@ export const Header = () => {
             </div>
           </div>
         </div>
-
-        <h1 className="text-4xl md:text-5xl font-extrabold pl-2 md:ml-20 mt-8 mb-6 tracking-tight">
-          Find Your Perfect Candidate
+        <h1 className="text-5xl font-bold  ml-20 mt-10 mb-6">
+          Find your perfect candidate
         </h1>
 
-        <div className="relative">
-          <div className="md:ml-20 px-4 md:px-0">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-              <div className="md:col-span-3 bg-white rounded-lg flex items-center px-3 py-2 shadow-sm border border-gray-200">
+          <div className="relative">
+          <div className="absolute top-3 left-20 flex flex-col items-center">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
+              <div className="md:col-span-4 bg-white rounded-md flex items-center px-3 shadow-lg">
                 <Search size={18} className="text-gray-400 mr-2" />
                 <TagInput
                   tags={searchParams.skills}
                   onChange={(tags) => updateSearchParams({ skills: tags })}
                   placeholder="Select required skills..."
                   suggestions={skillOptions}
-                  className="w-full focus:outline-none"
+                  className="w-full focus:outline-none text-lg"
                 />
               </div>
-              <div className="md:col-span-3 bg-white rounded-lg flex items-center px-3 py-2 shadow-sm border border-gray-200">
-                <MapPin size={18} className="text-gray-400 mr-2" />
+              <div className="md:col-span-3 bg-white rounded-md flex items-center px-3 shadow-lg">
+                <MapPin size={18} className="text-gray-400" />
                 <TagInput
                   tags={searchParams.location.split(",").filter(Boolean)}
                   onChange={(locations) =>
@@ -134,10 +136,10 @@ export const Header = () => {
                   }
                   placeholder="Select locations..."
                   suggestions={locationOptions}
-                  className="w-full focus:outline-none"
+                  className="w-full"
                 />
               </div>
-              <div className="md:col-span-3 bg-white rounded-lg flex items-center px-3 py-2 shadow-sm border border-gray-200">
+              <div className="md:col-span-2 bg-white rounded-md flex items-center px-3 shadow-lg">
                 <Briefcase size={18} className="text-gray-400 mr-2" />
                 <Dropdown
                   options={experienceOptions}
@@ -147,73 +149,84 @@ export const Header = () => {
                     updateSearchParams({ experienceRange: [0, years] });
                   }}
                   placeholder="Select experience..."
-                  className="w-full focus:outline-none"
+                  className="w-full"
                 />
               </div>
-              <div className="md:col-span-3">
-                <Button
-                  size="lg"
-                  onClick={executeSearch}
-                  className="w-full h-full bg-[#4f46e5] hover:bg-[#4338ca] text-white font-semibold rounded-lg shadow-md transition-colors duration-300"
-                >
+              <div className="md:col-span-3 bg-white rounded-md flex items-center shadow-lg">
+                <Button size="lg" className="text-lg text-gray-800 h-full w-full">
+                  <Search size={20} className=" text-gray-400 mr-2" />
                   Search
                 </Button>
               </div>
             </div>
-            <div className="mt-4">
-              <textarea
-                value={searchParams.keywords || ""}
-                onChange={handleKeywordsChange}
-                placeholder="Enter additional keywords or notes..."
-                className="w-full md:w-3/4 bg-white rounded-lg px-3 py-2 shadow-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4f46e5] focus:border-transparent resize-y min-h-[80px] text-gray-800"
-              />
-            </div>
-            <div className="mt-6 flex flex-wrap gap-3 items-center">
-              <Button
-                variant="outline"
-                size="md"
-                onClick={resetSearch}
-                className="bg-white/10 hover:bg-white/20 text-white border-white/20 hover:border-white/30 transition-colors duration-300"
-              >
-                Reset All Filters
-              </Button>
-              <Button
-                variant={searchParams.verifiedOnly ? "primary" : "outline"}
-                size="md"
-                onClick={toggleVerifiedOnly}
-                className={`${
-                  searchParams.verifiedOnly
-                    ? "bg-[#4f46e5] text-white"
-                    : "bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30"
-                } transition-colors duration-300`}
-              >
-                Only Verified Profiles
-              </Button>
-              <Button
-                variant={searchParams.topTierOnly ? "primary" : "outline"}
-                size="md"
-                onClick={toggleTopTierOnly}
-                className={`${
-                  searchParams.topTierOnly
-                    ? "bg-[#4f46e5] text-white"
-                    : "bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30"
-                } transition-colors duration-300`}
-              >
-                Only Top Tier
-              </Button>
-              <Dropdown
-                options={noticePeriodOptions}
-                value={searchParams.noticePeriod || ""}
-                onChange={handleNoticePeriodChange}
-                placeholder="Notice Period"
-                className="w-44 bg-white/10 text-white border-white/20 hover:bg-gray/20 focus:ring-[#4f46e5] rounded-lg"
-                textSuggestions="text-white"
-                classNameSuggestions="py-2 bg-[#2a2b5a] hover:bg-[#3a3b6a] text-white border-white/10"
-              />
-            </div>
+          <div>
+            {/* <div className="">
+              <div className="max-w-7xl mx-auto md:px-8 py-3">
+                <div className="flex flex-wrap gap-3 items-center text-white">
+                  <Button
+                    variant="outline"
+                    size="md"
+                    onClick={resetSearch}
+                    className="h-9 bg-gradient-to-r from-gray-300/70 to-gray-300/70 text-white focus:from-blue-500 focus:to-blue-400 hover:from-blue-500 hover:to-blue-400 shadow-md border-0 text-gray-500/70"
+                  >
+                    Reset all filters
+                  </Button>
+
+                  <Button
+                    variant={searchParams.verifiedOnly ? "primary" : "outline"}
+                    size="md"
+                    onClick={toggleVerifiedOnly}
+                    className={`bg-gradient-to-r from-gray-300/70 to-gray-300/70 text-gray-600 focus:from-blue-500 focus:to-blue-400 hover:from-blue-500 hover:to-blue-400 shadow-md border-0 text-gray-500/70 ${
+                      searchParams.verifiedOnly ? "text-white" : "text-gray-800"
+                    }`}
+                  >
+                    Only Verified Profiles
+                  </Button>
+
+                  <Button
+                    variant={searchParams.topTierOnly ? "primary" : "outline"}
+                    size="md"
+                    onClick={toggleTopTierOnly}
+                    className={`bg-gradient-to-r from-gray-300/70 to-gray-300/70 text-white focus:from-blue-500 focus:to-blue-400 hover:from-blue-500 hover:to-blue-400 shadow-md border-0 text-gray-500/70 ${
+                      searchParams.topTierOnly ? "text-white" : "text-gray-800"
+                    }`}
+                  >
+                    Only Top Tier
+                  </Button>
+
+
+                  <Dropdown
+                    options={noticePeriodOptions}
+                    value={searchParams.noticePeriod || ""}
+                    onChange={handleNoticePeriodChange}
+                    placeholder="Notice Period"
+                    className="w-44"
+                    textSuggestions="text-gray-500/70 hover:text-gray-200"
+                    classNameSuggestions="h-[36px] py-0 bg-gradient-to-r from-gray-300/70 to-gray-300/70 text-white focus:from-blue-500 hover:from-blue-500 hover:to-blue-400 focus:to-blue-400 shadow-md text-gray-500/70"
+                  />
+                </div>
+              </div>
+            </div> */}
           </div>
-        </div>
+        
+            </div>
+            
+          </div>
+          <br></br>
+          {/* <div className="ml-auto flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={resetSearch}
+              className="text-gray-800"
+            >
+              Reset
+            </Button>
+          </div> */}
       </div>
     </motion.header>
+
+
+    </>
   );
 };

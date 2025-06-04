@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MapPin, Phone, Mail, Github, Globe, Linkedin, FileText, Heart, Copy, CheckCircle, Briefcase, Plus, Edit, Trash2, X, Send, ChevronDown, Calendar, Clock, User, GraduationCap, Award } from 'lucide-react';
+import { ArrowLeft, MapPin, Phone, Mail, Github, Globe, Linkedin, FileText, Heart, Copy, CheckCircle, Briefcase, Plus, Edit, Trash2, X, Send, ChevronDown, Calendar, Clock, User, GraduationCap, Award, Bookmark } from 'lucide-react';
+import { Tag } from "../ui/Tag";
+import { Button } from "../ui/Button";
+import { useSearch } from '../../context/SearchContext';
 
 // Mock data (replace with actual data source or props)
 interface Candidate {
@@ -13,8 +16,11 @@ interface Candidate {
   socialLinks: { github?: string; portfolio?: string; linkedin?: string };
   experienceYears: number;
   isVerified: boolean;
+  currentSalary?: number;
   isTopTier: boolean;
   professionalSummary: string;
+  company?: string;
+  position?: string;
   skills: string[];
   experience: Array<{
     id: string;
@@ -107,13 +113,16 @@ const mockCandidates: Candidate[] = [
   {
     id: '1',
     name: 'John Doe',
-    profileImage: 'https://via.placeholder.com/150',
+    profileImage:'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=600',
+
     location: 'New York, NY',
     contactInfo: { phone: '123-456-7890', email: 'john.doe@example.com' },
     socialLinks: { github: 'https://github.com/johndoe', linkedin: 'https://linkedin.com/in/johndoe', portfolio: 'https://johndoe.com' },
     experienceYears: 5,
     isVerified: true,
     isTopTier: true,
+    company: 'Tech Solutions Inc.',
+    position: 'Senior Full Stack Developer',
     professionalSummary: 'Experienced full-stack developer with a passion for building scalable web applications.',
     skills: ['React', 'Node.js', 'TypeScript'],
     experience: [
@@ -157,7 +166,8 @@ const mockCandidates: Candidate[] = [
         description: 'Recognized for outstanding contributions.'
       }
     ],
-    noticePeriod: '2 weeks'
+    noticePeriod: '2 weeks',
+    currentSalary: 12,
   }
 ];
 
@@ -274,10 +284,15 @@ const CandidateDetailPage: React.FC = () => {
   const [interviews] = useState<Interview[]>(mockInterviews);
   const [showFeedback, setShowFeedback] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState<'overview' | 'emails' | 'interviews'>('overview');
+const { saveCandidate, searchState } = useSearch();
+  const isSaved = searchState.savedCandidates.some(
+    (c) => c.id === candidate?.id
+  );
 
+  
   // Find the candidate
   const candidate = candidates.find(c => c.id === id);
-
+  
   useEffect(() => {
     if (candidate) {
       setSelectedCandidate(candidate);
@@ -397,6 +412,11 @@ const CandidateDetailPage: React.FC = () => {
     setSavedLists(prev => [...prev, newList]);
   };
 
+  const displayedSkills = candidate?.skills.slice(0, 3);
+  let remainingSkills= 0;
+  if (candidate?.skills.length) {
+  remainingSkills = candidate?.skills.length - 3;
+  }
   if (!candidate) {
     return (
       <div className="min-h-screen bg-secondary-50 flex items-center justify-center">
@@ -423,30 +443,28 @@ const CandidateDetailPage: React.FC = () => {
       <header className="bg-secondary-800 text-white">
         <div className="container mx-auto py-4 px-4">
           <div className="flex items-center">
-            <button
-              className="flex items-center text-white mr-6 hover:text-secondary-200"
-              onClick={() => navigate('/search')}
-            >
-              <ArrowLeft size={20} className="mr-1" />
-              Back to Search
-            </button>
+            
             <div className="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 5.5A3.5 3.5 0 0 1 8.5 2H12v6H8.5A3.5 3.5 0 0 1 5 5.5z"></path>
-                <path d="M12 2h3.5a3.5 3.5 0 1 1 0 7H12V2z"></path>
-                <path d="M12 12.5a3.5 3.5 0 1 1 7 0 3.5 3.5 0 1 1-7 0z"></path>
-                <path d="M5 19.5A3.5 3.5 0 0 1 8.5 16H12v4H8.5A3.5 3.5 0 0 1 5 19.5z"></path>
-                <path d="M12 16h7.5"></path>
-                <path d="M12 16v4"></path>
-              </svg>
-              <span className="ml-2 font-bold text-xl">TalentScout</span>
+              
+               <img
+              src="/assets/logo2.png"
+              alt={candidate.name}
+              className="w-24 object-fit  "
+            />
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
+      <main className="relative container max-w-[1320px] mx-auto px-4 py-6">
+        <button
+              className="absolute top-1 flex items-center text-gray-500 mr-6 hover:text-secondary-500"
+              onClick={() => navigate('/search')}
+            >
+              <ArrowLeft size={20} className="mr-1" />
+              Back to Search
+            </button>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             {/* CandidateProfile */}
@@ -455,114 +473,137 @@ const CandidateDetailPage: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { duration: 0.3, staggerChildren: 0.1 } }}
             >
-              <div className="flex flex-col md:flex-row md:items-center">
-                <motion.div
-                  className="flex-shrink-0 relative mb-4 md:mb-0"
+              <div className=" bg-white rounded-lg p-4 w-full mx-auto">
+        
+        <div className="flex items-center mb-4">
+          <div className="w-20 h-20 bg-gray-200 rounded-md mr-4 flex items-center justify-center">
+            <motion.div
+                  className="flex-shrink-0 relative md:mb-0"
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                 >
-                  <img
-                    src={candidate.profileImage}
-                    alt={candidate.name}
-                    className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-secondary-100"
-                  />
-                  {candidate.isVerified && (
-                    <div className="absolute bottom-0 right-0 bg-primary-500 text-white rounded-full p-1.5">
-                      <CheckCircle size={16} />
-                    </div>
-                  )}
-                  {candidate.isTopTier && (
-                    <div className="absolute top-0 right-0 bg-warning-500 text-white rounded-full p-1.5">
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                      </svg>
-                    </div>
-                  )}
-                </motion.div>
-                <motion.div
-                  className="md:ml-6 flex-grow"
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                >
-                  <h2 className="text-2xl font-bold">{candidate.name}</h2>
-                  <div className="flex items-center text-secondary-600 mt-1">
-                    <MapPin size={16} className="mr-1" />
-                    <span>{candidate.location}</span>
-                  </div>
-                  <div className="flex flex-wrap mt-3 gap-3">
-                    <div className="flex items-center text-secondary-700">
-                      <Phone size={16} className="mr-1" />
-                      <span>{candidate.contactInfo.phone}</span>
+            <img
+              src={candidate.profileImage}
+              alt={candidate.name}
+              className="w-20 h-20 object-cover rounded-lg border-2 border-indigo-100"
+            />
+            
+                  </motion.div>
+        
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-800">
+              {candidate.name}
+              {candidate.isVerified && (
+                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Verified
+                </span>
+              )}
+              {candidate.isTopTier && (
+                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                  Top Tier
+                </span>
+              )}
+            </h2>
+            <p className=" flex flex-col justify-center items-left gap-2 text-sm text-gray-600">
+              {" "}
+              <span>{candidate.position} • {candidate.company}</span>
+              
                       <button
-                        onClick={() => navigator.clipboard.writeText(candidate.contactInfo.phone)}
+                        onClick={() => navigator.clipboard.writeText(candidate.contactInfo.email)}
                         className="ml-1 text-secondary-500 hover:text-secondary-700"
                       >
-                        <Copy size={14} />
+                        <span className='flex items-center'><Copy size={14} />{candidate.contactInfo.email}</span>
                       </button>
-                    </div>
-                    <div className="flex items-center text-secondary-700">
-                      <Mail size={16} className="mr-1" />
-                      <span>{candidate.contactInfo.email}</span>
-                    </div>
-                  </div>
-                  <div className="mt-3">
-                    <span className="bg-secondary-100 text-secondary-800 px-2 py-1 rounded text-sm inline-flex items-center">
-                      <Briefcase size={14} className="mr-1" />
-                      {candidate.experienceYears} years experience
-                    </span>
-                  </div>
-                </motion.div>
-                <motion.div
-                  className="mt-4 md:mt-0 flex md:flex-col items-center md:items-end gap-2"
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                >
-                  <div className="flex gap-2">
-                    {candidate.socialLinks.github && (
-                      <a
-                        href={candidate.socialLinks.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-secondary-100 p-2 rounded-full text-secondary-700 hover:bg-secondary-200"
-                      >
-                        <Github size={18} />
-                      </a>
-                    )}
-                    {candidate.socialLinks.portfolio && (
-                      <a
-                        href={candidate.socialLinks.portfolio}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-secondary-100 p-2 rounded-full text-secondary-700 hover:bg-secondary-200"
-                      >
-                        <Globe size={18} />
-                      </a>
-                    )}
-                    {candidate.socialLinks.linkedin && (
-                      <a
-                        href={candidate.socialLinks.linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-secondary-100 p-2 rounded-full text-secondary-700 hover:bg-secondary-200"
-                      >
-                        <Linkedin size={18} />
-                      </a>
-                    )}
-                    <button className="bg-secondary-100 p-2 rounded-full text-secondary-700 hover:bg-secondary-200">
-                      <FileText size={18} />
-                    </button>
-                  </div>
-                  <motion.button
-                    className="btn-primary flex items-center"
-                    onClick={() => setIsModalOpen(true)}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Heart size={16} className="mr-2" />
-                    Save Candidate
-                  </motion.button>
-                </motion.div>
+                      
+            </p>
+          </div>
+          <div className="flex gap-2 ml-48 mb-10"> 
+            {candidate.socialLinks.github && (
+              <a
+                href={candidate.socialLinks.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-secondary-100 p-2 rounded-full text-secondary-700 hover:bg-secondary-200"
+              >
+                <Github size={18} />
+              </a>
+            )}
+            {candidate.socialLinks.portfolio && (
+              <a
+                href={candidate.socialLinks.portfolio}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-secondary-100 p-2 rounded-full text-secondary-700 hover:bg-secondary-200"
+              >
+                <Globe size={18} />
+              </a>
+            )}
+            {candidate.socialLinks.linkedin && (
+              <a
+                href={candidate.socialLinks.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-secondary-100 p-2 rounded-full text-secondary-700 hover:bg-secondary-200"
+              >
+                <Linkedin size={18} />
+              </a>
+            )}
+            <button className="bg-secondary-100 p-2 rounded-full text-secondary-700 hover:bg-secondary-200">
+              <FileText size={18} />
+            </button>
+          </div>
+        </div>
+
+        
+        <div className="grid grid-cols-4 mb-2">
+          <div>
+            <p className="text-sm text-gray-500">Experience</p>
+            <p className="text-sm font-medium text-gray-800">
+              <span>{candidate.experienceYears} years</span>
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Notice Period</p>
+            <p className="text-sm font-medium text-gray-800">
+              <span>{candidate.noticePeriod} days</span>
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Current CTC</p>
+            <p className="text-sm font-medium text-gray-800">
+              {" "}
+              <span>₹{candidate.currentSalary} LPA</span>
+            </p>
+          </div>
+          <div className="">
+            <Button
+              variant={isSaved ? "primary" : "outline"}
+              leftIcon={
+                <Bookmark
+                  size={16}
+                  className={isSaved ? "text-white" : "text-indigo-500"}
+                />
+              }
+              onClick={(e) => {
+                
+                setIsModalOpen(true)
+              }}
+              disabled={isSaved}
+              className="text-gray-800 mt-2"
+            >
+              {isSaved ? "Saved" : "Save Candidate"}
+            </Button>
+          </div>
+        </div>
+
+        
+        <div className="flex justify-between items-center">
+          <div></div>
+          
+        </div>
               </div>
+              
             </motion.div>
 
             {/* ProfileTabs */}
@@ -587,7 +628,7 @@ const CandidateDetailPage: React.FC = () => {
                     >
                       {tabId.charAt(0).toUpperCase() + tabId.slice(1)}
                       {tabId === 'emails' && (
-                        <span className="absolute -top-0.5 -right-0.5 badge-primary">3</span>
+                        <span className="bg-green-400 w-4 rounded-full absolute -top-0.5 -right-0.5 badge-primary text-xs">3</span>
                       )}
                     </motion.button>
                   ))}
@@ -989,7 +1030,7 @@ const CandidateDetailPage: React.FC = () => {
                     exit={{ opacity: 0, y: -10 }}
                   >
                     <textarea
-                      className="input min-h-[100px] resize-y mb-3"
+                      className="input min-h-[90px] w-full max-w-[400px] resize-none mb-3"
                       placeholder="Write your note here..."
                       value={noteContent}
                       onChange={(e) => setNoteContent(e.target.value)}
@@ -1059,41 +1100,51 @@ const CandidateDetailPage: React.FC = () => {
 
       {/* SaveCandidateModal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50 p-4">
           <motion.div
-            className="bg-white rounded-lg p-6 w-full max-w-md"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white rounded-xl p-6 w-full max-w-xl max-h-[55vh] h-full overflow-y-auto shadow-2xl"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
           >
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Save Candidate</h3>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-semibold text-gray-900">Save Candidate</h3>
               <button
-                className="text-secondary-500 hover:text-secondary-700"
+                className="text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full p-1 transition-colors"
                 onClick={() => setIsModalOpen(false)}
+                aria-label="Close modal"
               >
-                <X size={20} />
+                <X size={24} />
               </button>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-secondary-700 mb-1">Select List</label>
+                <label htmlFor="list-select" className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Already Exiting List
+                </label>
                 <select
-                  className="input"
+                  id="list-select"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                   onChange={(e) => addCandidateToList(candidate.id, e.target.value)}
                 >
                   <option value="">Select a list</option>
                   {savedLists.map((list) => (
-                    <option key={list.id} value={list.id}>{list.name}</option>
+                    <option key={list.id} value={list.id}>
+                      {list.name}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-secondary-700 mb-1">Or Create New List</label>
+                <label htmlFor="new-list" className="block text-sm font-medium text-gray-700 mb-2">
+                  Or Create New List
+                </label>
                 <input
+                  id="new-list"
                   type="text"
-                  className="input"
-                  placeholder="New list name"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                  placeholder="DevOps Candidates"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && e.currentTarget.value.trim()) {
                       createNewList(e.currentTarget.value.trim(), candidate.id);
@@ -1103,15 +1154,15 @@ const CandidateDetailPage: React.FC = () => {
                   }}
                 />
               </div>
-              <div className="flex justify-end gap-2">
+              <div className="pt-10 flex justify-end gap-3">
                 <button
-                  className="btn-outlined text-sm py-1.5"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                   onClick={() => setIsModalOpen(false)}
                 >
                   Cancel
                 </button>
                 <button
-                  className="btn-primary text-sm py-1.5"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                   onClick={() => setIsModalOpen(false)}
                 >
                   Save

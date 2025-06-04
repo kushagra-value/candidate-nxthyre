@@ -10,7 +10,7 @@ export const LandingView = () => {
   const [showHero, setShowHero] = React.useState(!hasSearched);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-500 to-purple-500">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       {showHero ? (
         <HeroOverlay onClose={() => setShowHero(false)} />
       ) : (

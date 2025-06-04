@@ -12,6 +12,8 @@ export const mockCandidates: Candidate[] = [
     skills: ['Machine Learning', 'TypeScript', 'Node.js', 'MongoDB', 'AWS'],
     isVerified: true,
     isTopTier: true,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Tech',
     education: 'Master\'s',
     verificationStatus: {
@@ -40,6 +42,8 @@ export const mockCandidates: Candidate[] = [
     skills: ['Pytorch', 'React', 'CSS', 'HTML', 'UI/UX'],
     isVerified: true,
     isTopTier: false,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Tech',
     education: 'Bachelor\'s',
     verificationStatus: {
@@ -68,6 +72,8 @@ export const mockCandidates: Candidate[] = [
     skills: ['TensorFlow', 'Spring Boot', 'Microservices', 'AWS', 'Docker', 'Kubernetes'],
     isVerified: true,
     isTopTier: true,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Tech',
     education: 'PhD',
     verificationStatus: {
@@ -96,6 +102,8 @@ export const mockCandidates: Candidate[] = [
     skills: ['Python', 'Django', 'Flask', 'SQL', 'Data Analysis'],
     isVerified: false,
     isTopTier: false,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Finance',
     education: 'Master\'s',
     verificationStatus: {
@@ -124,6 +132,8 @@ export const mockCandidates: Candidate[] = [
     skills: ['React', 'Angular', 'Vue.js', 'JavaScript', 'TypeScript', 'Redux'],
     isVerified: true,
     isTopTier: true,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Tech',
     education: 'Bachelor\'s',
     verificationStatus: {
@@ -152,6 +162,8 @@ export const mockCandidates: Candidate[] = [
     skills: ['HTML', 'CSS', 'JavaScript', 'Bootstrap', 'React'],
     isVerified: false,
     isTopTier: false,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Tech',
     education: 'Bachelor\'s',
     verificationStatus: {
@@ -180,6 +192,8 @@ export const mockCandidates: Candidate[] = [
     skills: ['Product Management', 'Leadership', 'Strategy', 'Business Development', 'Agile'],
     isVerified: true,
     isTopTier: true,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Tech',
     education: 'MBA',
     verificationStatus: {
@@ -208,6 +222,8 @@ export const mockCandidates: Candidate[] = [
     skills: ['Data Science', 'Machine Learning', 'Python', 'R', 'SQL', 'Big Data'],
     isVerified: true,
     isTopTier: true,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Tech',
     education: 'PhD',
     verificationStatus: {
@@ -236,6 +252,8 @@ export const mockCandidates: Candidate[] = [
     skills: ['Marketing', 'Digital Marketing', 'SEO', 'SEM', 'Content Strategy'],
     isVerified: true,
     isTopTier: false,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Marketing',
     education: 'Master\'s',
     verificationStatus: {
@@ -264,6 +282,8 @@ export const mockCandidates: Candidate[] = [
     skills: ['DevOps', 'AWS', 'Azure', 'Docker', 'Kubernetes', 'CI/CD', 'Jenkins'],
     isVerified: true,
     isTopTier: true,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Tech',
     education: 'Bachelor\'s',
     verificationStatus: {
@@ -295,6 +315,8 @@ export const mockFavorableCandidates: Candidate[] = [
     skills: ['React', 'TypeScript', 'Node.js', 'GraphQL', 'AWS'],
     isVerified: true,
     isTopTier: true,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Tech',
     education: 'Master\'s',
     verificationStatus: {
@@ -323,6 +345,8 @@ export const mockFavorableCandidates: Candidate[] = [
     skills: ['Java', 'Spring Boot', 'Microservices', 'Kafka', 'Docker'],
     isVerified: true,
     isTopTier: false,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Tech',
     education: 'Bachelor\'s',
     verificationStatus: {
@@ -351,6 +375,8 @@ export const mockFavorableCandidates: Candidate[] = [
     skills: ['Python', 'Django', 'React', 'PostgreSQL', 'AWS'],
     isVerified: false,
     isTopTier: false,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Tech',
     education: 'Bachelor\'s',
     verificationStatus: {
@@ -379,6 +405,8 @@ export const mockFavorableCandidates: Candidate[] = [
     skills: ['Product Management', 'UX/UI', 'Market Research', 'Analytics'],
     isVerified: true,
     isTopTier: true,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Product',
     education: 'MBA',
     verificationStatus: {
@@ -407,6 +435,8 @@ export const mockFavorableCandidates: Candidate[] = [
     skills: ['Angular', 'TypeScript', 'Node.js', 'MongoDB', 'Express'],
     isVerified: true,
     isTopTier: false,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Tech',
     education: 'Master\'s',
     verificationStatus: {
@@ -435,6 +465,8 @@ export const mockFavorableCandidates: Candidate[] = [
     skills: ['React', 'JavaScript', 'HTML', 'CSS', 'Bootstrap'],
     isVerified: false,
     isTopTier: false,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Tech',
     education: 'Bachelor\'s',
     verificationStatus: {
@@ -463,6 +495,8 @@ export const mockFavorableCandidates: Candidate[] = [
     skills: ['Data Engineering', 'Hadoop', 'Spark', 'Python', 'SQL', 'AWS'],
     isVerified: true,
     isTopTier: true,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Tech',
     education: 'Master\'s',
     verificationStatus: {
@@ -491,6 +525,8 @@ export const mockFavorableCandidates: Candidate[] = [
     skills: ['iOS Development', 'Swift', 'Objective-C', 'Mobile Architecture'],
     isVerified: true,
     isTopTier: false,
+    company: 'GoogleDeepMind',
+    position: 'Software Engineer',
     industry: 'Tech',
     education: 'Bachelor\'s',
     verificationStatus: {
