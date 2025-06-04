@@ -3,8 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 from Service.MongoFilter import MongoFilter
+from bson import ObjectId
+from bson.errors import InvalidId
+from typing import Optional, Dict, Any
+from fastapi import HTTPException
 
 app = FastAPI()
+MongoDB_URI = "mongodb+srv://leena:leena123@cluster0.hinzr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 
 # Add CORS middleware
 app.add_middleware(
@@ -29,7 +34,7 @@ async def filter_resumes(filters: FilterInput):
     Returns a list of filtered resume documents.
     """
     # MongoDB URI (replace with your actual URI or use environment variables)
-    uri = "mongodb+srv://leena:leena123@cluster0.hinzr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    uri = MongoDB_URI
     
     # Initialize MongoFilter
     mongo_filter = MongoFilter(uri)
@@ -55,6 +60,49 @@ async def filter_resumes(filters: FilterInput):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing request: {str(e)}")
 
+    finally:
+        # Close MongoDB connection
+        mongo_filter.close()
+        
+    # def get_data_by_id(self, resume_id: str) -> Optional[Dict[str, Any]]:
+    #     """Fetch a single resume document by its ID."""
+    #     if self.collection is None:
+    #         raise RuntimeError("Database not connected. Call connect() first.")
+
+    #     try:
+    #         resume = self.collection.find_one({"_id": resume_id})
+    #         if resume:
+    #             resume['_id'] = str(resume['_id'])  # Convert ObjectId to string
+    #         return resume
+    #     except Exception as e:
+    #         print(f"Error fetching data by ID: {e}")
+    #         
+@app.get("/resume/{resume_id}", response_model=Dict[str, Any])
+async def get_resume_by_id(resume_id: str):
+    """
+    GET endpoint to fetch a single resume document by its ID.
+    Returns the resume document if found, otherwise raises a 404 error.
+    """
+    # Validate ObjectId format first
+    try:
+        ObjectId(resume_id)
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid resume ID format")
+    
+    # MongoDB URI (replace with your actual URI or use environment variables)
+    uri = MongoDB_URI
+    # Initialize MongoFilter
+    mongo_filter = MongoFilter(uri)
+    try:
+        # Connect to MongoDB
+        mongo_filter.connect()
+        # Fetch resume by ID
+        resume = mongo_filter.get_data_by_id(resume_id)
+        if not resume:
+            raise HTTPException(status_code=404, detail="Resume not found")
+        return resume
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing request: {str(e)}")
     finally:
         # Close MongoDB connection
         mongo_filter.close()

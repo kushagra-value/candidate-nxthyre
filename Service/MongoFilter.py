@@ -2,12 +2,16 @@ import json
 from pymongo import MongoClient
 from typing import List, Dict, Any, Optional
 from bson.regex import Regex
+from bson import ObjectId
+from bson.errors import InvalidId
+from typing import Optional, Dict, Any
+from fastapi import HTTPException
 
 class MongoFilter:
     def __init__(self, uri: str):
         self.client = MongoClient(uri)
         self.db_name = "Resumes"
-        self.collection_name = "Resume_detail"
+        self.collection_name = "Resumes"
         self.collection = None
 
     def connect(self) -> None:
@@ -103,4 +107,24 @@ class MongoFilter:
             return filtered_data
         except Exception as e:
             print(f"Error fetching or saving data: {e}")
+            raise
+        
+    def get_data_by_id(self, resume_id: str) -> Optional[Dict[str, Any]]:
+        """Fetch a single resume document by its ID."""
+        if self.collection is None:
+            raise RuntimeError("Database not connected. Call connect() first.")
+        
+        try:
+            # Convert string to ObjectId
+            object_id = ObjectId(resume_id)
+            resume = self.collection.find_one({"_id": object_id})
+            if resume:
+                resume['_id'] = str(resume['_id'])  # Convert ObjectId to string
+            return resume
+        except InvalidId:
+            # Handle invalid ObjectId format
+            print(f"Invalid ObjectId format: {resume_id}")
+            return None
+        except Exception as e:
+            print(f"Error fetching data by ID: {e}")
             raise
