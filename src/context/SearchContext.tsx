@@ -1,4 +1,5 @@
-import { createContext, useState, useContext, ReactNode } from 'react';
+// SearchContext.tsx
+import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import axios from 'axios';
 import { SearchParams, SearchState, Candidate } from '../types';
 
@@ -49,11 +50,44 @@ const defaultSearchState: SearchState = {
   favorableCandidates: [],
 };
 
+// Load saved results from localStorage
+const loadSavedResults = (): Candidate[] => {
+  try {
+    const saved = localStorage.getItem('searchResults');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Basic validation to ensure parsed data matches Candidate interface
+      if (Array.isArray(parsed) && parsed.every(item => item.id && item.name)) {
+        return parsed;
+      }
+    }
+    return [];
+  } catch (error) {
+    console.error('Error loading saved results from localStorage:', error);
+    return [];
+  }
+};
+
 export const SearchContext = createContext<SearchContextType | undefined>(undefined);
 
 export const SearchProvider = ({ children }: { children: ReactNode }) => {
   const [searchParams, setSearchParams] = useState<SearchParams>(defaultSearchParams);
-  const [searchState, setSearchState] = useState<SearchState>(defaultSearchState);
+  const [searchState, setSearchState] = useState<SearchState>({
+    ...defaultSearchState,
+    results: loadSavedResults(),
+    totalResults: loadSavedResults().length,
+    hasSearched: loadSavedResults().length > 0,
+    favorableCandidates: loadSavedResults().slice(0, 5),
+  });
+
+  // Save results to localStorage whenever searchState.results changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('searchResults', JSON.stringify(searchState.results));
+    } catch (error) {
+      console.error('Error saving results to localStorage:', error);
+    }
+  }, [searchState.results]);
 
   const updateSearchParams = (params: Partial<SearchParams>) => {
     setSearchParams((prev) => ({ ...prev, ...params }));
@@ -158,6 +192,12 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
       currentPage: 1,
       favorableCandidates: [],
     }));
+    // Clear localStorage on reset
+    try {
+      localStorage.removeItem('searchResults');
+    } catch (error) {
+      console.error('Error clearing localStorage:', error);
+    }
   };
 
   const saveCandidate = (candidate: Candidate) => {
