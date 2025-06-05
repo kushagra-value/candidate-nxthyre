@@ -1,4 +1,5 @@
 import json
+import re
 from pymongo import MongoClient
 from typing import List, Dict, Any, Optional
 from bson.regex import Regex
@@ -47,21 +48,24 @@ class MongoFilter:
             with open('unfiltered_data.json', 'w') as f:
                 json.dump(unfiltered_data, f, indent=4)
             print("Unfiltered data saved to unfiltered_data.json")
+            print(f"Unfiltered data count: {len(unfiltered_data)}")
 
             # Build query dynamically for filtered data
             query = {}
 
             # Add skills filter if provided
-            if filters.get("skills") and len(filters["skills"]) > 0:
-                skill_pattern = "|".join(filters["skills"])
-                query["core_technical_skills_claimed"] = {
-                    "$regex": skill_pattern,
+            # Skills filter
+            if filters.get("skills"):
+                skill_pattern = r"(?i)\b(" + "|".join(re.escape(skill.strip()) for skill in filters["skills"]) + r")\b"
+                query["core_technical_skills_claimed"] = {"$regex": skill_pattern}
+
+            # Location filter
+            if filters.get("locations"):
+                location_pattern = "|".join(re.escape(loc.strip()) for loc in filters["locations"])
+                query["preferred_location"] = {
+                    "$regex": location_pattern,
                     "$options": "i"
                 }
-
-            # Add locations filter if provided
-            if filters.get("locations") and len(filters["locations"]) > 0:
-                query["preferred_location"] = {"$in": filters["locations"]}
 
             # Aggregation pipeline
             pipeline = [
@@ -93,8 +97,12 @@ class MongoFilter:
                     "$unset": "total_experience_float"
                 }
             ]
+            print(f"Final query: {query}")
 
             filtered_data = list(self.collection.aggregate(pipeline))
+            print(json.dumps(pipeline, indent=2))
+            print(f"Filtered data count: {len(filtered_data)}")
+            
             for doc in filtered_data:
                 if '_id' in doc:
                     doc['_id'] = str(doc['_id'])

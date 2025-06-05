@@ -53,16 +53,20 @@ async def filter_resumes(filters: FilterInput):
         #     keyword_list = [kw.strip() for kw in filter_dict["keywords"].split(",") if kw.strip()]
         #     filter_dict["skills"] = (filter_dict.get("skills") or []) + keyword_list
             # del filter_dict["keywords"]  # Remove keywords from filter_dict
-        print(filter_dict)
+        # print(filter_dict)
         # Get filtered data
         results = mongo_filter.get_filtered_data(filter_dict)
-        print("yaha tk")
+        print("Results:", results)
     #   if not usertext==None:
     #       result = akshy ka code run
         if filter_dict["keywords"]:
+            print("these are the keywords", filter_dict["keywords"])
+            print("these are the results", results)
             # Here you can implement the logic to process user_nlp_text
             # For now, we will just return the results as is
             results = semantic_search_and_rerank(results, filter_dict["keywords"], top_k=20, rerank_top=20)
+        
+        print("Filtered Results:", results)
             
         return results
 

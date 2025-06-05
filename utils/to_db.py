@@ -6,10 +6,10 @@ mongo_uri = "mongodb+srv://leena:leena123@cluster0.hinzr.mongodb.net/?retryWrite
 
 # Replace with your DB and collection names
 db_name = "Resumes"
-collection_name = "Resumes"
+collection_name = "Resumes1"
 
 # Load JSON file
-with open('D:\\Resume_Screening\\backend\\utils\\data.json', 'r') as f:
+with open('D:\\Resume_Screening\\backend\\v2_db_and_jsons\\naukri_candidates_base_1960\\naukri_candidates_base.json', 'r') as f:
     data = json.load(f)  # Expecting a list of dictionaries
 
 # Connect to MongoDB Atlas
