@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Briefcase, IndianRupee, Clock, Bookmark } from "lucide-react";
+import { MapPin, Briefcase, IndianRupee, Clock, Bookmark, BadgeCheck, Diamond, Gem } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "../ui/Button";
 import { Tag } from "../ui/Tag";
@@ -51,13 +51,14 @@ export const CandidateCard = ({ candidate, index }: CandidateCardProps) => {
             <h2 className="text-xl font-bold text-gray-800">
               {candidate.name}
               {candidate.isVerified && (
-                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  Verified
+                <span className=" ml-2 inline-flex items-center  rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                  <BadgeCheck className="w-4 h-4"
+                   />
                 </span>
               )}
               {candidate.isTopTier && (
-                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                  Top Tier
+                <span className="ml-2 inline-flex items-center rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <Gem className="w-4 h-4" />
                 </span>
               )}
             </h2>
