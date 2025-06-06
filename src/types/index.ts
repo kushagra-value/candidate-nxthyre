@@ -2,14 +2,14 @@ export interface Candidate {
   id: string;
   name: string;
   profilePicture: string;
-  location: string; // Maps to preferred_location
+  location: string;
   contactInfo: { phone: string; email: string };
   socialLinks: { github?: string; portfolio?: string; linkedin?: string };
-  experience: number; // Maps to total_experience
+  experience: number;
   isVerified: boolean;
   isTopTier: boolean;
   professionalSummary: string;
-  skills: string[]; // Maps to core_technical_skills_claimed (split by commas)
+  skills: string[];
   experienceDetails: Array<{
     id: string;
     role: string;
@@ -20,16 +20,8 @@ export interface Candidate {
     description: string;
     isVerified: boolean;
   }>;
-  education: Array<{
-    id: string;
-    degree: string;
-    field: string;
-    institution: string;
-    startYear: string;
-    endYear: string;
-    grade?: string;
-    isVerified: boolean;
-  }>;
+  education: string; // Changed from array to string to match educationLevel filter
+  industry: string; // Added to match industry filter
   certifications: Array<{
     id: string;
     name: string;
@@ -46,11 +38,21 @@ export interface Candidate {
     date: string;
     description: string;
   }>;
-  noticePeriod: string;
+  noticePeriod: string; // Ensured as string to match working filter
   currentSalary?: string;
+  expectedCTC?: string;
   university: string;
   company: string;
   position: string;
+  universityTier: string; // Added to match universityTier filter
+  employmentGaps: boolean; // Added to match employmentGaps filter
+  graduationYear: number; // Added to match graduationYearRange filter
+  verificationStatus: {
+    email: boolean;
+    linkedin: boolean;
+    employment: boolean;
+    education: boolean;
+  };
 }
 
 export interface Note {

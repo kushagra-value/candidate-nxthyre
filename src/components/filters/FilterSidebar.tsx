@@ -6,7 +6,7 @@ import { Input } from '../ui/Input';
 import { TagInput } from '../ui/TagInput';
 import { Button } from '../ui/Button';
 import { useSearch } from '../../context/SearchContext';
-import { industries, educationLevels, universityTiers, salaryRanges } from '../../data/mockData';
+import { industries, educationLevels, universityTiers, salaryRanges, noticePeriodOptions, skillsOptions } from '../../data/mockData';
 
 export const FilterSidebar = () => {
   const { searchParams, updateSearchParams } = useSearch();
@@ -54,6 +54,7 @@ export const FilterSidebar = () => {
       : [...searchParams.expectedCTCRange, range];
     updateSearchParams({ expectedCTCRange: updated });
   };
+
   const toggleVerifiedOnly = () => {
     updateSearchParams({ verifiedOnly: !searchParams.verifiedOnly });
   };
@@ -89,6 +90,12 @@ export const FilterSidebar = () => {
       case 'expectedCTCRange':
         updateSearchParams({ expectedCTCRange: [] });
         break;
+      case 'mostFrequent':
+        updateSearchParams({ verifiedOnly: false, topTierOnly: false });
+        break;
+      case 'employmentGaps':
+        updateSearchParams({ employmentGaps: false });
+        break;
       default:
         break;
     }
@@ -99,7 +106,7 @@ export const FilterSidebar = () => {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white rounded-lg  p-4 h-[calc(100vh-7rem)] overflow-y-auto sticky top-28 scrollbar-hide"
+      className="bg-white rounded-lg p-4 h-[calc(100vh-7rem)] overflow-y-auto sticky top-28 scrollbar-hide"
     >
       <style>
         {`
@@ -113,53 +120,45 @@ export const FilterSidebar = () => {
         `}
       </style>
       
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold text-gray-800 ">Filters</h2>
-          {searchParams.industry.length > 0 && (
-            <button
-              className="text-blue-500 text-sm hover:underline"
-              onClick={() => clearSection('industry')}
-            >
-              ClearAll
-            </button>
-          )}
-        </div>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-bold text-gray-800">Filters</h2>
+        {searchParams.industry.length > 0 && (
+          <button
+            className="text-blue-500 text-sm hover:underline"
+            onClick={() => clearSection('industry')}
+          >
+            ClearAll
+          </button>
+        )}
+      </div>
       <div className="space-y-6">
-        {/* Industry */}
+        {/* Most Frequent */}
         <div className="relative">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-md font-medium text-gray-700">Most Frequent</h3>
-            {(searchParams.verifiedOnly||searchParams.topTierOnly) && (
+            {(searchParams.verifiedOnly || searchParams.topTierOnly) && (
               <button
                 className="text-blue-500 text-sm hover:underline"
-                onClick={() => clearSection('topTierOnly')}
+                onClick={() => clearSection('mostFrequent')}
               >
                 Clear
               </button>
             )}
           </div>
           <div className="space-y-2 flex flex-col items-start text-sm">
-            
-              <button
-              key={'topTierOnly'}
-                onClick={toggleTopTierOnly}
-                className={`justify-start  focus:bg-blue-400 focus:text-white focus:px-2 text-sm rounded-[4px]'}`}
-              >
-                Top Tier
-              </button>
-              <button
-              key={'topTierOnly'}
-                onClick={toggleVerifiedOnly}
-                className={`justify-start  focus:bg-blue-400 focus:text-white focus:px-2 text-sm rounded-[4px]'}`}
-              >
-                Verified Profile
-              </button>
-              
+            <button
+              onClick={toggleTopTierOnly}
+              className={`justify-start ${searchParams.topTierOnly ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
+            >
+              Top Tier
+            </button>
+            <button
+              onClick={toggleVerifiedOnly}
+              className={`justify-start ${searchParams.verifiedOnly ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
+            >
+              Verified Profile
+            </button>
           </div>
-          {/* Skills */}
-        
-          
-        
         </div>
         {/* Industry */}
         <div className="relative">
@@ -179,24 +178,23 @@ export const FilterSidebar = () => {
               <button
                 key={industry}
                 onClick={() => handleIndustryChange(industry)}
-                className={` justify-start ${searchParams.industry.includes(industry) ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
+                className={`justify-start ${searchParams.industry.includes(industry) ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
               >
                 {industry}
               </button>
             ))}
           </div>
         </div>
-
         {/* Notice period */}
         <div>
           <h3 className="text-md font-medium text-gray-700 mb-2">Notice Period</h3>
           <TagInput
-            tags={searchParams.skills}
-            onChange={(tags) => updateSearchParams({ skills: tags })}
+            tags={searchParams.noticePeriod ? [searchParams.noticePeriod] : []}
+            onChange={(tags) => updateSearchParams({ noticePeriod: tags[0] || null })}
             placeholder="10 days"
+            suggestions={noticePeriodOptions}
           />
         </div>
-        
         {/* Education Level */}
         <div className="relative">
           <div className="flex justify-between items-center mb-2">
@@ -215,14 +213,13 @@ export const FilterSidebar = () => {
               <button
                 key={education}
                 onClick={() => handleEducationChange(education)}
-                className={` justify-start ${searchParams.educationLevel.includes(education) ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
+                className={`justify-start ${searchParams.educationLevel.includes(education) ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
               >
                 {education}
               </button>
             ))}
           </div>
         </div>
-        
         {/* Verification Status */}
         <div className="relative">
           <div className="flex justify-between items-center mb-2">
@@ -239,44 +236,39 @@ export const FilterSidebar = () => {
           </div>
           <div className="space-y-2 flex flex-col items-start text-sm">
             <button
-              
               onClick={() => handleVerificationChange('email', !searchParams.verificationStatus.email)}
-              className={` justify-start ${searchParams.verificationStatus.email ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
+              className={`justify-start ${searchParams.verificationStatus.email ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
             >
               Email Verified
             </button>
             <button
-              
               onClick={() => handleVerificationChange('linkedin', !searchParams.verificationStatus.linkedin)}
-              className={` justify-start ${searchParams.verificationStatus.linkedin ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
+              className={`justify-start ${searchParams.verificationStatus.linkedin ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
             >
               LinkedIn Verified
             </button>
             <button
-             
               onClick={() => handleVerificationChange('employment', !searchParams.verificationStatus.employment)}
-              className={` justify-start ${searchParams.verificationStatus.employment ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
+              className={`justify-start ${searchParams.verificationStatus.employment ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
             >
               Employment History Verified
             </button>
             <button
-              
               onClick={() => handleVerificationChange('education', !searchParams.verificationStatus.education)}
-              className={` justify-start ${searchParams.verificationStatus.education ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
+              className={`justify-start ${searchParams.verificationStatus.education ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
             >
               Education Background Verified
             </button>
           </div>
         </div>
-        
         {/* Employment Gaps */}
         <div className="relative">
           <div className="flex justify-between items-center mb-2">
-            <h3 className="text-md font-medium text-gray-700">Verification Status</h3>
-            {(searchParams.employmentGaps==true||!searchParams.employmentGaps==true) && (
+            <h3 className="text-md font-medium text-gray-700">Employment Gaps</h3>
+            {searchParams.employmentGaps && (
               <button
                 className="text-blue-500 text-sm hover:underline"
-                onClick={() => clearSection('verificationStatus')}
+                onClick={() => clearSection('employmentGaps')}
               >
                 Clear
               </button>
@@ -284,24 +276,19 @@ export const FilterSidebar = () => {
           </div>
           <div className="space-y-2 flex flex-col items-start text-sm">
             <button
-            onClick={() => updateSearchParams({ employmentGaps: searchParams.employmentGaps })}
-            className={` ${searchParams.employmentGaps ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
-          >
-            Yes
-          </button>
+              onClick={() => updateSearchParams({ employmentGaps: true })}
+              className={`justify-start ${searchParams.employmentGaps ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
+            >
+              Yes
+            </button>
             <button
-            onClick={() => updateSearchParams({ employmentGaps: !searchParams.employmentGaps })}
-            className={` ${searchParams.employmentGaps ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
-          >
-            No
-          </button>
-            
-            
+              onClick={() => updateSearchParams({ employmentGaps: false })}
+              className={`justify-start ${!searchParams.employmentGaps ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
+            >
+              No
+            </button>
           </div>
         </div>
-        
-       
-        
         {/* Skills */}
         <div>
           <h3 className="text-md font-medium text-gray-700 mb-2">Skills</h3>
@@ -309,9 +296,9 @@ export const FilterSidebar = () => {
             tags={searchParams.skills}
             onChange={(tags) => updateSearchParams({ skills: tags })}
             placeholder="Add skills..."
+            suggestions={skillsOptions}
           />
         </div>
-        
         {/* Graduation Year */}
         <div>
           <h3 className="text-md font-medium text-gray-700 mb-2">Graduation Year</h3>
@@ -322,7 +309,6 @@ export const FilterSidebar = () => {
             onChange={(value) => updateSearchParams({ graduationYearRange: value })}
           />
         </div>
-        
         {/* University */}
         <div>
           <h3 className="text-md font-medium text-gray-700 mb-2">University</h3>
@@ -332,7 +318,6 @@ export const FilterSidebar = () => {
             onChange={(e) => updateSearchParams({ university: e.target.value })}
           />
         </div>
-        
         {/* University Tier */}
         <div className="relative">
           <div className="flex justify-between items-center mb-2">
@@ -351,41 +336,34 @@ export const FilterSidebar = () => {
               <button
                 key={tier}
                 onClick={() => handleUniversityTierChange(tier)}
-                className={`${searchParams.universityTier.includes(tier) ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
+                className={`justify-start ${searchParams.universityTier.includes(tier) ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
               >
                 {tier}
               </button>
             ))}
           </div>
         </div>
-        
         {/* Certifications, Awards, Social Proof */}
-        <div className=" space-y-2 flex flex-col items-start text-sm">
+        <div className="space-y-2 flex flex-col items-start text-sm">
           <button
-            
             onClick={() => updateSearchParams({ hasCertifications: !searchParams.hasCertifications })}
-            className={` ${searchParams.hasCertifications ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
+            className={`justify-start ${searchParams.hasCertifications ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
           >
             Has Certifications
           </button>
-          
           <button
-            
             onClick={() => updateSearchParams({ hasAwards: !searchParams.hasAwards })}
-            className={` ${searchParams.hasAwards ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
+            className={`justify-start ${searchParams.hasAwards ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
           >
             Has Awards
           </button>
-          
           <button
-            
             onClick={() => updateSearchParams({ hasSocialProof: !searchParams.hasSocialProof })}
-            className={` ${searchParams.hasSocialProof ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
+            className={`justify-start ${searchParams.hasSocialProof ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
           >
             Has Social Proof
           </button>
         </div>
-        
         {/* Current Salary */}
         <div className="relative">
           <div className="flex justify-between items-center mb-2">
@@ -399,19 +377,18 @@ export const FilterSidebar = () => {
               </button>
             )}
           </div>
-          <div className="space-y-2  flex flex-col items-start text-sm">
+          <div className="space-y-2 flex flex-col items-start text-sm">
             {salaryRanges.map((range) => (
               <button
                 key={range}
                 onClick={() => handleSalaryRangeChange(range)}
-                className={` justify-start ${searchParams.currentSalaryRange.includes(range) ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
+                className={`justify-start ${searchParams.currentSalaryRange.includes(range) ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
               >
                 {range}
               </button>
             ))}
           </div>
         </div>
-        
         {/* Expected CTC */}
         <div className="relative">
           <div className="flex justify-between items-center mb-2">
@@ -425,11 +402,10 @@ export const FilterSidebar = () => {
               </button>
             )}
           </div>
-          <div className="space-y-2  flex flex-col items-start text-sm">
+          <div className="space-y-2 flex flex-col items-start text-sm">
             {salaryRanges.map((range) => (
               <button
                 key={range}
-               
                 onClick={() => handleExpectedCTCChange(range)}
                 className={`justify-start ${searchParams.expectedCTCRange.includes(range) ? 'bg-blue-400 text-white px-2 text-sm rounded-[4px]' : ''}`}
               >

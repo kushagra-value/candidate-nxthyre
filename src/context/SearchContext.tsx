@@ -89,6 +89,71 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         }
       }
 
+      // Filter by industry
+      if (searchParams.industry.length > 0) {
+        if (!searchParams.industry.includes(candidate.industry)) return false;
+      }
+
+      // Filter by education level
+      if (searchParams.educationLevel.length > 0) {
+        if (!searchParams.educationLevel.includes(candidate.education)) return false;
+      }
+
+      // Filter by verification status
+      if (searchParams.verificationStatus.email && !candidate.verificationStatus.email) return false;
+      if (searchParams.verificationStatus.linkedin && !candidate.verificationStatus.linkedin) return false;
+      if (searchParams.verificationStatus.employment && !candidate.verificationStatus.employment) return false;
+      if (searchParams.verificationStatus.education && !candidate.verificationStatus.education) return false;
+
+      // Filter by employment gaps
+      if (searchParams.employmentGaps !== candidate.employmentGaps) return false;
+
+      // Filter by graduation year
+      if (candidate.graduationYear < searchParams.graduationYearRange[0] ||
+          candidate.graduationYear > searchParams.graduationYearRange[1]) {
+        return false;
+      }
+
+      // Filter by university
+      if (searchParams.university) {
+        if (!candidate.university.toLowerCase().includes(searchParams.university.toLowerCase())) return false;
+      }
+
+      // Filter by university tier
+      if (searchParams.universityTier.length > 0) {
+        if (!searchParams.universityTier.includes(candidate.universityTier)) return false;
+      }
+
+      // Filter by current salary range
+      if (searchParams.currentSalaryRange.length > 0) {
+        const salary = parseFloat(candidate.currentSalary || '0');
+        let inRange = false;
+        for (const range of searchParams.currentSalaryRange) {
+          if (range === '25L+') {
+            if (salary >= 25) inRange = true;
+          } else {
+            const [min, max] = range.split('-').map(s => parseFloat(s.replace('L', '')));
+            if (salary >= min && (max ? salary <= max : true)) inRange = true;
+          }
+        }
+        if (!inRange) return false;
+      }
+
+      // Filter by expected CTC range
+      if (searchParams.expectedCTCRange.length > 0) {
+        const ctc = parseFloat(candidate.expectedCTC || '0');
+        let inRange = false;
+        for (const range of searchParams.expectedCTCRange) {
+          if (range === '25L+') {
+            if (ctc >= 25) inRange = true;
+          } else {
+            const [min, max] = range.split('-').map(s => parseFloat(s.replace('L', '')));
+            if (ctc >= min && (max ? ctc <= max : true)) inRange = true;
+          }
+        }
+        if (!inRange) return false;
+      }
+
       // Filter by experience
       if (candidate.experience < searchParams.experienceRange[0] ||
           candidate.experience > searchParams.experienceRange[1]) {
