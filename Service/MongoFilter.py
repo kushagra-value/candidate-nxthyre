@@ -12,7 +12,7 @@ class MongoFilter:
     def __init__(self, uri: str):
         self.client = MongoClient(uri)
         self.db_name = "Resumes"
-        self.collection_name = "Resumes"
+        self.collection_name = "Resumes1"
         self.collection = None
 
     def connect(self) -> None:
@@ -54,7 +54,6 @@ class MongoFilter:
             query = {}
 
             # Add skills filter if provided
-            # Skills filter
             if filters.get("skills"):
                 skill_pattern = r"(?i)\b(" + "|".join(re.escape(skill.strip()) for skill in filters["skills"]) + r")\b"
                 query["core_technical_skills_claimed"] = {"$regex": skill_pattern}
@@ -84,12 +83,12 @@ class MongoFilter:
                 },
                 # Apply filters
                 {"$match": query},
-                # Add experience filter if provided (greater than or equal to the specified value)
+                # Add experience filter with default value of 0
                 {
                     "$match": {
                         "total_experience_float": {
                             "$gte": filters.get("experience", 0)
-                        } if filters.get("experience") is not None else {}
+                        }
                     }
                 },
                 # Remove temporary field
