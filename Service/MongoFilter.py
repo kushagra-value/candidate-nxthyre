@@ -12,7 +12,7 @@ class MongoFilter:
     def __init__(self, uri: str):
         self.client = MongoClient(uri)
         self.db_name = "Resumes"
-        self.collection_name = "Resumes1"
+        self.collection_name = "Resumes"
         self.collection = None
 
     def connect(self) -> None:

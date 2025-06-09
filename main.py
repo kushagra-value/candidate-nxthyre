@@ -7,7 +7,7 @@ from bson import ObjectId
 from bson.errors import InvalidId
 from typing import Optional, Dict, Any
 from fastapi import HTTPException
-from db_rerank.match_and_rerank import semantic_search_and_rerank
+from match_and_rerank import semantic_search_and_rerank
 
 app = FastAPI()
 MongoDB_URI = "mongodb+srv://leena:leena123@cluster0.hinzr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
@@ -15,7 +15,7 @@ MongoDB_URI = "mongodb+srv://leena:leena123@cluster0.hinzr.mongodb.net/?retryWri
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Frontend URL (adjust if different)
+    allow_origins=["*"],  # Frontend URL (adjust if different)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -56,7 +56,7 @@ async def filter_resumes(filters: FilterInput):
         if filter_dict.get("keywords"):
             print("these are the keywords", filter_dict["keywords"])
             print("these are the results", results)
-            results = semantic_search_and_rerank(results, filter_dict["keywords"], top_k=20, rerank_top=20)
+            results = semantic_search_and_rerank(results, filter_dict["keywords"], top_k=30, rerank_top=30)
         
         print("Filtered Results:", results)
         return results
@@ -67,19 +67,7 @@ async def filter_resumes(filters: FilterInput):
     finally:
         # Close MongoDB connection
         mongo_filter.close()
-    # def get_data_by_id(self, resume_id: str) -> Optional[Dict[str, Any]]:
-    #     """Fetch a single resume document by its ID."""
-    #     if self.collection is None:
-    #         raise RuntimeError("Database not connected. Call connect() first.")
 
-    #     try:
-    #         resume = self.collection.find_one({"_id": resume_id})
-    #         if resume:
-    #             resume['_id'] = str(resume['_id'])  # Convert ObjectId to string
-    #         return resume
-    #     except Exception as e:
-    #         print(f"Error fetching data by ID: {e}")
-    #         
 @app.get("/resume/{resume_id}", response_model=Dict[str, Any])
 async def get_resume_by_id(resume_id: str):
     """
@@ -100,8 +88,11 @@ async def get_resume_by_id(resume_id: str):
         # Connect to MongoDB
         mongo_filter.connect()
         # Fetch resume by ID
+        print(f"Fetching resume with ID: {resume_id}")
         resume = mongo_filter.get_data_by_id(resume_id)
+        print(f"Resume fetched: {resume}")
         if not resume:
+            
             raise HTTPException(status_code=404, detail="Resume not found")
         return resume
     except Exception as e:
