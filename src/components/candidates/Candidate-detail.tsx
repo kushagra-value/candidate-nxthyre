@@ -281,8 +281,11 @@ const CandidateDetailPage: React.FC = () => {
         return;
       }
       try {
+        console.log("Fetching candidate data for ID:", id);
         const response = await axios.get(`http://localhost:8000/resume/${id}`);
+        console.log("Candidate data fetched successfully:", response.data);
         const doc = response.data;
+        console.log("Candidate document:", doc);
         const mappedCandidate: Candidate = {
           id: doc._id,
           name: doc.name || "Unknown",
@@ -304,11 +307,8 @@ const CandidateDetailPage: React.FC = () => {
           isVerified: doc.is_email_verified || false,
           isTopTier: doc.last_graduation_university_tier === "TOP" || false,
           professionalSummary: doc.professionalSummary || "No summary provided",
-          skills: doc.core_technical_skills_claimed
-            ? doc.core_technical_skills_claimed
-                .split(",")
-                .map((s: string) => s.trim())
-            : [],
+          skills: doc.core_technical_skills_claimed,
+            
           experience: doc.experienceDetails || [],
           education: doc.last_graduation_degree
             ? [
@@ -351,28 +351,15 @@ const CandidateDetailPage: React.FC = () => {
             },
           ],
         };
-// noticePeriod: string; 
-//   currentSalary?: string; 
-//   expectedCTC?: string; 
-//   industry: string; 
-//   university: string; 
-//   employmentGaps: boolean; 
-//   universityTier: string; 
-//   graduationYear: number;
-//   currentCompany: string;
-//   currentTitle: string;
-//   verificationStatus: Array<{
-//     email: boolean;
-//     linkedin: boolean;
-//     employment: boolean;
-//   }>;
 
-
+        console.log("logg logg logggggg")
+        console.log("Mapped candidate:", mappedCandidate);
         setSelectedCandidate(mappedCandidate);
       } catch (err: any) {
         setError(
           err.response?.data?.detail || "Failed to fetch candidate details"
         );
+        console.error("Error fetching candidate data:", err);
       } finally {
         setLoading(false);
       }
