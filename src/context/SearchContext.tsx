@@ -214,8 +214,8 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         if (!hasMatchingEmployment) return false;
       }
 
-      // Filter by employment gaps
-      if (searchParams.employmentGaps == candidate.employmentGaps) return false;
+      // // Filter by employment gaps
+      // if (searchParams.employmentGaps == candidate.employmentGaps) return false;
 
       // Filter by graduation year
       if (candidate.graduationYear < searchParams.graduationYearRange[0] ||

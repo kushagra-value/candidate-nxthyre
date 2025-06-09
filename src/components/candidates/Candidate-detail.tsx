@@ -31,7 +31,7 @@ import axios from "axios";
 import { useSearch } from "../../context/SearchContext";
 import { Button } from "../ui/Button";
 
-// Interface definitions remain unchanged
+// Interface definitions
 interface Candidate {
   id: string;
   name: string;
@@ -42,7 +42,6 @@ interface Candidate {
   experienceYears: number;
   isVerified: boolean;
   isTopTier: boolean;
-  professionalSummary: string;
   skills: string[];
   experience: Array<{
     id: string;
@@ -144,7 +143,7 @@ interface SavedList {
   candidates: string[];
 }
 
-// Mock data for notes, emails, templates, interviews (unchanged)
+// Mock data
 const mockNotes: Note[] = [
   {
     id: "note1",
@@ -272,7 +271,7 @@ const CandidateDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const isSaved = searchState.savedCandidates.some((c) => c.id === id);
 
-  // Fetch candidate data from API
+  // Fetch candidate data
   useEffect(() => {
     const fetchCandidate = async () => {
       if (!id) {
@@ -286,6 +285,10 @@ const CandidateDetailPage: React.FC = () => {
         console.log("Candidate data fetched successfully:", response.data);
         const doc = response.data;
         console.log("Candidate document:", doc);
+        console.log("certifications_claimed type:", typeof doc.certifications_claimed);
+        console.log("certifications_claimed value:", doc.certifications_claimed);
+        console.log("core_technical_skills_claimed:", doc.core_technical_skills_claimed);
+
         const mappedCandidate: Candidate = {
           id: doc._id,
           name: doc.name || "Unknown",
@@ -297,19 +300,27 @@ const CandidateDetailPage: React.FC = () => {
           },
           socialLinks: {
             github: doc.github !== "NA" ? doc.github : undefined,
-            portfolio:
-              doc.portfolio_website !== "NA"
-                ? doc.portfolio_website
-                : undefined,
+            portfolio: doc.portfolio_website !== "NA" ? doc.portfolio_website : undefined,
             linkedin: doc.linkedin !== "NA" ? doc.linkedin : undefined,
           },
-          experienceYears: doc.total_experience || 0,
-          isVerified: doc.is_email_verified || false,
+          experienceYears: parseFloat(doc.total_experience) || 0,
+          isVerified: doc.is_email_verified === true || false,
           isTopTier: doc.last_graduation_university_tier === "TOP" || false,
-          professionalSummary: doc.professionalSummary || "No summary provided",
-          skills: doc.core_technical_skills_claimed,
-            
-          experience: doc.experienceDetails || [],
+          skills: doc.core_technical_skills_claimed
+            ? Object.values(doc.core_technical_skills_claimed)
+            : [],
+          experience: doc.past_titles && doc.past_titles !== "NA"
+            ? doc.past_titles.map((role: string, index: number) => ({
+                id: `${doc._id}_${index}`,
+                role,
+                company: doc.past_companies[index] || "Unknown",
+                startDate: "N/A",
+                endDate: undefined,
+                isCurrent: false,
+                description: "No description provided",
+                isVerified: doc.is_employment_history_verified === true || false,
+              }))
+            : [],
           education: doc.last_graduation_degree
             ? [
                 {
@@ -317,25 +328,30 @@ const CandidateDetailPage: React.FC = () => {
                   degree: doc.last_graduation_degree,
                   field: doc.specialization || "N/A",
                   institution: doc.last_graduation_university || "N/A",
-                  startYear: doc.last_graduation_year
-                    ? doc.last_graduation_year.toString()
-                    : "N/A",
-                  endYear: doc.last_graduation_year
-                    ? doc.last_graduation_year.toString()
-                    : "N/A",
+                  startYear: doc.last_graduation_year ? doc.last_graduation_year.toString() : "N/A",
+                  endYear: doc.last_graduation_year ? doc.last_graduation_year.toString() : "N/A",
                   grade: undefined,
-                  isVerified:
-                    doc.educational_backgroud_verification === "verified",
+                  isVerified: doc.educational_backgroud_verification === "verified",
                 },
               ]
             : [],
-          certifications: doc.certifcations_claimed || [],
-          awards: doc.awards || [],
+          certifications: Array.isArray(doc.certifications_claimed)
+            ? doc.certifications_claimed.map((cert: any, index: number) => ({
+                id: cert.id || `cert_${index}`,
+                name: cert.name || "Unknown Certification",
+                issuer: cert.issuer || "Unknown Issuer",
+                issueDate: cert.issueDate || "N/A",
+                expiryDate: cert.expiryDate,
+                credentialID: cert.credentialID,
+                isVerified: cert.isVerified || false,
+              }))
+            : doc.certifications_claimed === "NA"
+            ? []
+            : [],
+          awards: Array.isArray(doc.awards) ? doc.awards : [],
           noticePeriod: doc.notice_period || "N/A",
-          currentSalary: doc.current_salary
-            ? `₹${doc.current_salary} LPA`
-            : "N/A",
-          expectedCTC: doc.expected_ctc ? `₹${doc.expected_ctc} LPA` : "N/A",
+          currentSalary: doc.current_ctc ? `₹${doc.current_ctc}` : "N/A",
+          expectedCTC: doc.expected_ctc ? `₹${doc.expected_ctc}` : "N/A",
           industry: doc.industry || "N/A",
           university: doc.last_graduation_university || "N/A",
           employmentGaps: doc.employment_gaps || false,
@@ -346,13 +362,12 @@ const CandidateDetailPage: React.FC = () => {
           verificationStatus: [
             {
               email: doc.is_email_verified || false,
-              linkedin: doc.is_linkedin_verified || false,
+              linkedin: doc.is_linkedin_valid || false,
               employment: doc.is_employment_verified || false,
             },
           ],
         };
 
-        console.log("logg logg logggggg")
         console.log("Mapped candidate:", mappedCandidate);
         setSelectedCandidate(mappedCandidate);
       } catch (err: any) {
@@ -498,7 +513,6 @@ const CandidateDetailPage: React.FC = () => {
         experience: selectedCandidate.experienceYears,
         isVerified: selectedCandidate.isVerified,
         isTopTier: selectedCandidate.isTopTier,
-        professionalSummary: selectedCandidate.professionalSummary,
         skills: selectedCandidate.skills,
         experienceDetails: selectedCandidate.experience,
         education: selectedCandidate.education,
@@ -537,7 +551,6 @@ const CandidateDetailPage: React.FC = () => {
         experience: selectedCandidate.experienceYears,
         isVerified: selectedCandidate.isVerified,
         isTopTier: selectedCandidate.isTopTier,
-        professionalSummary: selectedCandidate.professionalSummary,
         skills: selectedCandidate.skills,
         experienceDetails: selectedCandidate.experience,
         education: selectedCandidate.education,
@@ -602,7 +615,7 @@ const CandidateDetailPage: React.FC = () => {
               <img
                 src="/assets/logo2.png"
                 alt="NxtHyre"
-                className="w-24 object-fit  "
+                className="w-24 object-fit"
               />
             </div>
           </div>
@@ -629,7 +642,7 @@ const CandidateDetailPage: React.FC = () => {
                 transition: { duration: 0.3, staggerChildren: 0.1 },
               }}
             >
-              <div className=" bg-white rounded-lg p-4 w-full mx-auto">
+              <div className="bg-white rounded-lg p-4 w-full mx-auto">
                 <div className="flex items-center mb-4">
                   <div className="w-20 h-20 bg-gray-200 rounded-md mr-4 flex items-center justify-center">
                     <motion.div
@@ -658,8 +671,7 @@ const CandidateDetailPage: React.FC = () => {
                         </span>
                       )}
                     </h2>
-                    <p className=" flex flex-col justify-center items-left gap-2 text-sm text-gray-600">
-                      {" "}
+                    <p className="flex flex-col justify-center items-left gap-2 text-sm text-gray-600">
                       <span>
                         {selectedCandidate.currentTitle} •{" "}
                         {selectedCandidate.currentCompany}
@@ -726,14 +738,13 @@ const CandidateDetailPage: React.FC = () => {
                   <div>
                     <p className="text-sm text-gray-500">Notice Period</p>
                     <p className="text-sm font-medium text-gray-800">
-                      <span>{selectedCandidate.noticePeriod} days</span>
+                      <span>{selectedCandidate.noticePeriod}</span>
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Current CTC</p>
                     <p className="text-sm font-medium text-gray-800">
-                      {" "}
-                      <span>₹{selectedCandidate.currentSalary} LPA</span>
+                      <span>{selectedCandidate.currentSalary}</span>
                     </p>
                   </div>
                   <div className="">
@@ -745,9 +756,7 @@ const CandidateDetailPage: React.FC = () => {
                           className={isSaved ? "text-white" : "text-indigo-500"}
                         />
                       }
-                      onClick={(e) => {
-                        setIsModalOpen(true);
-                      }}
+                      onClick={() => setIsModalOpen(true)}
                       disabled={isSaved}
                       className="text-gray-800 mt-2"
                     >
@@ -810,9 +819,9 @@ const CandidateDetailPage: React.FC = () => {
                           <h3 className="text-lg font-semibold mb-3">
                             Professional Summary
                           </h3>
-                          <p className="text-secondary-700">
+                          {/* <p className="text-secondary-700">
                             {selectedCandidate.professionalSummary}
-                          </p>
+                          </p> */}
                         </motion.div>
                         <motion.div
                           initial={{ opacity: 0, y: 20 }}
@@ -827,49 +836,52 @@ const CandidateDetailPage: React.FC = () => {
                             ))}
                           </div>
                         </motion.div>
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                        >
-                          <h3 className="text-lg font-semibold mb-3">
-                            Experience
-                          </h3>
-                          <div className="space-y-4">
-                            {selectedCandidate.experience.map((exp) => (
-                              <div key={exp.id} className="flex">
-                                <div className="flex-shrink-0 mt-1">
-                                  <div className="w-10 h-10 rounded-full bg-secondary-100 flex items-center justify-center">
-                                    <Briefcase
-                                      size={18}
-                                      className="text-secondary-700"
-                                    />
+                        {Array.isArray(selectedCandidate.experience) &&
+                          selectedCandidate.experience.length > 0 && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                            >
+                              <h3 className="text-lg font-semibold mb-3">
+                                Experience
+                              </h3>
+                              <div className="space-y-4">
+                                {selectedCandidate.experience.map((exp) => (
+                                  <div key={exp.id} className="flex">
+                                    <div className="flex-shrink-0 mt-1">
+                                      <div className="w-10 h-10 rounded-full bg-secondary-100 flex items-center justify-center">
+                                        <Briefcase
+                                          size={18}
+                                          className="text-secondary-700"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="ml-4">
+                                      <div className="flex items-center">
+                                        <h4 className="font-medium">{exp.role}</h4>
+                                        {exp.isVerified && (
+                                          <CheckCircle
+                                            size={16}
+                                            className="ml-2 text-success-500"
+                                          />
+                                        )}
+                                      </div>
+                                      <div className="text-secondary-600">
+                                        {exp.company}
+                                      </div>
+                                      <div className="text-sm text-secondary-500 mt-1">
+                                        {exp.startDate} -{" "}
+                                        {exp.isCurrent ? "Present" : exp.endDate}
+                                      </div>
+                                      <p className="mt-2 text-secondary-700">
+                                        {exp.description}
+                                      </p>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="ml-4">
-                                  <div className="flex items-center">
-                                    <h4 className="font-medium">{exp.role}</h4>
-                                    {exp.isVerified && (
-                                      <CheckCircle
-                                        size={16}
-                                        className="ml-2 text-success-500"
-                                      />
-                                    )}
-                                  </div>
-                                  <div className="text-secondary-600">
-                                    {exp.company}
-                                  </div>
-                                  <div className="text-sm text-secondary-500 mt-1">
-                                    {exp.startDate} -{" "}
-                                    {exp.isCurrent ? "Present" : exp.endDate}
-                                  </div>
-                                  <p className="mt-2 text-secondary-700">
-                                    {exp.description}
-                                  </p>
-                                </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        </motion.div>
+                            </motion.div>
+                          )}
                         <motion.div
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -916,91 +928,89 @@ const CandidateDetailPage: React.FC = () => {
                             ))}
                           </div>
                         </motion.div>
-                        {selectedCandidate.certifications.length > 0 && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                          >
-                            <h3 className="text-lg font-semibold mb-3">
-                              Certifications
-                            </h3>
-                            <div className="space-y-3">
-                              {selectedCandidate.certifications.map((cert) => (
-                                <div key={cert.id} className="flex">
-                                  <div className="flex-shrink-0 mt-1">
-                                    <div className="w-10 h-10 rounded-full bg-secondary-100 flex items-center justify-center">
-                                      {/* l <CertificateIcon size={18} className="text-secondary-700" /> */}
+                        {Array.isArray(selectedCandidate.certifications) &&
+                          selectedCandidate.certifications.length > 0 && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                            >
+                              <h3 className="text-lg font-semibold mb-3">
+                                Certifications
+                              </h3>
+                              <div className="space-y-3">
+                                {selectedCandidate.certifications.map((cert) => (
+                                  <div key={cert.id} className="flex">
+                                    <div className="flex-shrink-0 mt-1">
+                                      <div className="w-10 h-10 rounded-full bg-secondary-100 flex items-center justify-center">
+                                        {/* <CertificateIcon size={18} className="text-secondary-700" /> */}
+                                      </div>
                                     </div>
-                                  </div>
-                                  <div className="ml-4">
-                                    <div className="flex items-center">
-                                      <h4 className="font-medium">
-                                        {cert.name}
-                                      </h4>
-                                      {cert.isVerified && (
-                                        <CheckCircle
-                                          size={16}
-                                          className="ml-2 text-success-500"
-                                        />
+                                    <div className="ml-4">
+                                      <div className="flex items-center">
+                                        <h4 className="font-medium">{cert.name}</h4>
+                                        {cert.isVerified && (
+                                          <CheckCircle
+                                            size={16}
+                                            className="ml-2 text-success-500"
+                                          />
+                                        )}
+                                      </div>
+                                      <div className="text-secondary-600">
+                                        {cert.issuer}
+                                      </div>
+                                      <div className="text-sm text-secondary-500 mt-1">
+                                        Issued: {cert.issueDate}
+                                        {cert.expiryDate &&
+                                          ` · Expires: ${cert.expiryDate}`}
+                                      </div>
+                                      {cert.credentialID && (
+                                        <div className="mt-1 text-sm text-secondary-700">
+                                          Credential ID: {cert.credentialID}
+                                        </div>
                                       )}
                                     </div>
-                                    <div className="text-secondary-600">
-                                      {cert.issuer}
-                                    </div>
-                                    <div className="text-sm text-secondary-500 mt-1">
-                                      Issued: {cert.issueDate}
-                                      {cert.expiryDate &&
-                                        ` · Expires: ${cert.expiryDate}`}
-                                    </div>
-                                    {cert.credentialID && (
-                                      <div className="mt-1 text-sm text-secondary-700">
-                                        Credential ID: {cert.credentialID}
+                                  </div>
+                                ))}
+                              </div>
+                            </motion.div>
+                          )}
+                        {Array.isArray(selectedCandidate.awards) &&
+                          selectedCandidate.awards.length > 0 && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                            >
+                              <h3 className="text-lg font-semibold mb-3">
+                                Awards
+                              </h3>
+                              <div className="space-y-3">
+                                {selectedCandidate.awards.map((award) => (
+                                  <div key={award.id} className="flex">
+                                    <div className="flex-shrink-0 mt-1">
+                                      <div className="w-10 h-10 rounded-full bg-secondary-100 flex items-center justify-center">
+                                        <Award
+                                          size={18}
+                                          className="text-secondary-700"
+                                        />
                                       </div>
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </motion.div>
-                        )}
-                        {selectedCandidate.awards.length > 0 && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                          >
-                            <h3 className="text-lg font-semibold mb-3">
-                              Awards
-                            </h3>
-                            <div className="space-y-3">
-                              {selectedCandidate.awards.map((award) => (
-                                <div key={award.id} className="flex">
-                                  <div className="flex-shrink-0 mt-1">
-                                    <div className="w-10 h-10 rounded-full bg-secondary-100 flex items-center justify-center">
-                                      <Award
-                                        size={18}
-                                        className="text-secondary-700"
-                                      />
+                                    </div>
+                                    <div className="ml-4">
+                                      <h4 className="font-medium">{award.title}</h4>
+                                      <div className="text-secondary-600">
+                                        {award.issuer}
+                                      </div>
+                                      <div className="text-sm text-secondary-500 mt-1">
+                                        {award.date}
+                                      </div>
+                                      <p className="mt-1 text-secondary-700">
+                                        {award.description}
+                                      </p>
                                     </div>
                                   </div>
-                                  <div className="ml-4">
-                                    <h4 className="font-medium">
-                                      {award.title}
-                                    </h4>
-                                    <div className="text-secondary-600">
-                                      {award.issuer}
-                                    </div>
-                                    <div className="text-sm text-secondary-500 mt-1">
-                                      {award.date}
-                                    </div>
-                                    <p className="mt-1 text-secondary-700">
-                                      {award.description}
-                                    </p>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </motion.div>
-                        )}
+                                ))}
+                              </div>
+                            </motion.div>
+                          )}
                       </div>
                     )}
                     {activeTab === "emails" && (
@@ -1025,9 +1035,7 @@ const CandidateDetailPage: React.FC = () => {
                               >
                                 <div className="flex justify-between items-start">
                                   <div>
-                                    <h4 className="font-medium">
-                                      {email.subject}
-                                    </h4>
+                                    <h4 className="font-medium">{email.subject}</h4>
                                     <div className="text-xs text-secondary-500 mt-1">
                                       {email.date}
                                     </div>
@@ -1098,9 +1106,7 @@ const CandidateDetailPage: React.FC = () => {
                                 className="input"
                                 placeholder="Subject"
                                 value={emailSubject}
-                                onChange={(e) =>
-                                  setEmailSubject(e.target.value)
-                                }
+                                onChange={(e) => setEmailSubject(e.target.value)}
                               />
                             </div>
                             <div>
@@ -1111,9 +1117,7 @@ const CandidateDetailPage: React.FC = () => {
                                 className="input min-h-[200px] resize-y"
                                 placeholder="Write your message here..."
                                 value={emailContent}
-                                onChange={(e) =>
-                                  setEmailContent(e.target.value)
-                                }
+                                onChange={(e) => setEmailContent(e.target.value)}
                               />
                             </div>
                             <div className="flex justify-end">
@@ -1437,7 +1441,7 @@ const CandidateDetailPage: React.FC = () => {
                   htmlFor="list-select"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Select Already Exiting List
+                  Select Already Existing List
                 </label>
                 <select
                   id="list-select"

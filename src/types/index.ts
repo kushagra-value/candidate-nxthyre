@@ -8,7 +8,6 @@ export interface Candidate {
   experience: number; // Maps to total_experience
   isVerified: boolean; // Default false if not in DB
   isTopTier: boolean; // Default false if not in DB
-  professionalSummary: string; // Default empty if not in DB
   skills: string[]; // Maps to core_technical_skills_claimed
   experienceDetails: Array<{
     id: string;

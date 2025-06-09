@@ -87,14 +87,14 @@ export const CandidateCard = ({ candidate, index }: CandidateCardProps) => {
           <div>
             <p className="text-sm text-gray-500">Notice Period</p>
             <p className="text-sm font-medium text-gray-800">
-              <span>{candidate.noticePeriod} days</span>
+              <span>{candidate.noticePeriod} </span>
             </p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Current CTC</p>
             <p className="text-sm font-medium text-gray-800">
               {" "}
-              <span>₹{candidate.currentSalary} LPA</span>
+              <span>₹{candidate.currentSalary}</span>
             </p>
           </div>
         </div>
