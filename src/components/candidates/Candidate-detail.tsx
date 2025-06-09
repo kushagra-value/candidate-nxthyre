@@ -42,7 +42,6 @@ interface Candidate {
   experienceYears: number;
   isVerified: boolean;
   isTopTier: boolean;
-  professionalSummary: string;
   skills: string[];
   experience: Array<{
     id: string;
@@ -293,49 +292,47 @@ const CandidateDetailPage: React.FC = () => {
             email: doc.email || "N/A",
           },
           socialLinks: {
-            github: doc.github !== "NA" ? doc.github : undefined,
-            portfolio:
-              doc.portfolio_website !== "NA"
-                ? doc.portfolio_website
-                : undefined,
-            linkedin: doc.linkedin !== "NA" ? doc.linkedin : undefined,
-          },
-          experienceYears: doc.total_experience || 0,
-          isVerified: doc.is_email_verified || false,
+  github: doc.github !== "NA" ? doc.github : undefined,
+  portfolio: doc.portfolio_website !== "NA" ? doc.portfolio_website : undefined,
+  linkedin: doc.linkedin !== "NA" ? doc.linkedin : undefined,
+},
+          experienceYears: parseFloat(doc.total_experience) || 0,
+          isVerified: doc.is_email_verified === true || false,
           isTopTier: doc.last_graduation_university_tier === "TOP" || false,
-          professionalSummary: doc.professionalSummary || "No summary provided",
           skills: doc.core_technical_skills_claimed
-            ? doc.core_technical_skills_claimed
-                .split(",")
-                .map((s: string) => s.trim())
-            : [],
-          experience: doc.experienceDetails || [],
-          education: doc.last_graduation_degree
-            ? [
-                {
-                  id: doc._id,
-                  degree: doc.last_graduation_degree,
-                  field: doc.specialization || "N/A",
-                  institution: doc.last_graduation_university || "N/A",
-                  startYear: doc.last_graduation_year
-                    ? doc.last_graduation_year.toString()
-                    : "N/A",
-                  endYear: doc.last_graduation_year
-                    ? doc.last_graduation_year.toString()
-                    : "N/A",
-                  grade: undefined,
-                  isVerified:
-                    doc.educational_backgroud_verification === "verified",
-                },
-              ]
-            : [],
+  ? Object.keys(doc.core_technical_skills_claimed)
+  : [],
+          experience: doc.past_titles && doc.past_companies
+  ? doc.past_titles.map((role: string, index: number) => ({
+      id: `${doc._id}_${index}`,
+      role,
+      company: doc.past_companies[index] || "Unknown",
+      startDate: "N/A",
+      endDate: undefined,
+      isCurrent: false,
+      description: "No description provided",
+      isVerified: doc.is_employment_history_verified === true || false,
+    }))
+  : [],
+  education: doc.last_graduation_degree
+  ? [
+      {
+        id: doc._id,
+        degree: doc.last_graduation_degree,
+        field: doc.specialization || "N/A",
+        institution: doc.last_graduation_university || "N/A",
+        startYear: doc.last_graduation_year ? doc.last_graduation_year.toString() : "N/A",
+        endYear: doc.last_graduation_year ? doc.last_graduation_year.toString() : "N/A",
+        grade: undefined,
+        isVerified: doc.educational_backgroud_verification === "verified",
+      },
+    ]
+  : [],
           certifications: doc.certifcations_claimed || [],
           awards: doc.awards || [],
           noticePeriod: doc.notice_period || "N/A",
-          currentSalary: doc.current_salary
-            ? `₹${doc.current_salary} LPA`
-            : "N/A",
-          expectedCTC: doc.expected_ctc ? `₹${doc.expected_ctc} LPA` : "N/A",
+          currentSalary: doc.current_ctc ? `₹${doc.current_ctc}` : "N/A",
+          expectedCTC: doc.expected_ctc ? `₹${doc.expected_ctc}` : "N/A",
           industry: doc.industry || "N/A",
           university: doc.last_graduation_university || "N/A",
           employmentGaps: doc.employment_gaps || false,
@@ -346,7 +343,7 @@ const CandidateDetailPage: React.FC = () => {
           verificationStatus: [
             {
               email: doc.is_email_verified || false,
-              linkedin: doc.is_linkedin_verified || false,
+              linkedin: doc.is_linkedin_valid || false,
               employment: doc.is_employment_verified || false,
             },
           ],
@@ -511,7 +508,6 @@ const CandidateDetailPage: React.FC = () => {
         experience: selectedCandidate.experienceYears,
         isVerified: selectedCandidate.isVerified,
         isTopTier: selectedCandidate.isTopTier,
-        professionalSummary: selectedCandidate.professionalSummary,
         skills: selectedCandidate.skills,
         experienceDetails: selectedCandidate.experience,
         education: selectedCandidate.education,
@@ -550,7 +546,6 @@ const CandidateDetailPage: React.FC = () => {
         experience: selectedCandidate.experienceYears,
         isVerified: selectedCandidate.isVerified,
         isTopTier: selectedCandidate.isTopTier,
-        professionalSummary: selectedCandidate.professionalSummary,
         skills: selectedCandidate.skills,
         experienceDetails: selectedCandidate.experience,
         education: selectedCandidate.education,
@@ -739,14 +734,14 @@ const CandidateDetailPage: React.FC = () => {
                   <div>
                     <p className="text-sm text-gray-500">Notice Period</p>
                     <p className="text-sm font-medium text-gray-800">
-                      <span>{selectedCandidate.noticePeriod} days</span>
+                      <span>{selectedCandidate.noticePeriod}</span>
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Current CTC</p>
                     <p className="text-sm font-medium text-gray-800">
                       {" "}
-                      <span>₹{selectedCandidate.currentSalary} LPA</span>
+                      <span>{selectedCandidate.currentSalary}</span>
                     </p>
                   </div>
                   <div className="">
@@ -823,9 +818,9 @@ const CandidateDetailPage: React.FC = () => {
                           <h3 className="text-lg font-semibold mb-3">
                             Professional Summary
                           </h3>
-                          <p className="text-secondary-700">
+                          {/* <p className="text-secondary-700">
                             {selectedCandidate.professionalSummary}
-                          </p>
+                          </p> */}
                         </motion.div>
                         <motion.div
                           initial={{ opacity: 0, y: 20 }}
