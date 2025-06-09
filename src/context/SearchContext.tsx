@@ -30,7 +30,7 @@ const defaultSearchParams: SearchParams = {
     education: false,
   },
   employmentGaps: false,
-  graduationYearRange: [2010, 2024],
+  graduationYearRange: [2000, 2025],
   university: '',
   universityTier: [],
   hasCertifications: false,
@@ -114,7 +114,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
       const candidates: Candidate[] = response.data.map((doc: any) => ({
         id: doc._id,
         name: doc.name || 'Unknown',
-        profilePicture: doc.profilePicture || 'https://via.placeholder.com/150',
+        profilePicture: doc.profilePicture || 'https://blocks.astratic.com/img/general-img-landscape.png',
         location: doc.preferred_location || 'Unknown',
         contactInfo: {
           phone: doc.phone || 'N/A',
@@ -148,6 +148,19 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         awards: doc.awards || [],
         noticePeriod: doc.notice_period || 'N/A',
         currentSalary: doc.current_ctc || 'N/A',
+        expectedCTC: doc.expected_ctc || 'N/A',
+        industry: doc.industry_knowledge || 'N/A',
+        university: doc.last_graduation_university || 'N/A',
+        employmentGaps:doc.has_employement_gaps || false,
+        universityTier:doc.last_graduation_university_tier || 'N/A',
+        graduationYear:doc.last_graduation_year || 0,
+        verificationStatus: {
+          email: doc.is_email_verified || false,
+          linkedin: doc.is_linkedin_valid || false,
+          employment: doc.is_employement_history_verified || false,
+        },
+        currentCompany: doc.current_company || 'N/A',
+        currentTitle: doc.current_title || 'N/A',
       }));
 
       const filteredCandidates = candidates.filter((candidate) => {
@@ -158,8 +171,67 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
           const candidateDays = parseInt(candidate.noticePeriod.replace(/\D/g, '')) || 0;
           if (candidateDays > days) return false;
         }
-        return true;
-      });
+        // Filter by skills
+      if (searchParams.skills.length > 0) {
+        const hasAllSkills = searchParams.skills.every(skill =>
+          candidate.skills.includes(skill)
+        );
+        if (!hasAllSkills) return false;
+      }
+
+      // // Filter by location
+      if (searchParams.location) {
+        const locations = searchParams.location.split(',').filter(Boolean);
+        if (locations.length > 0 && !locations.includes(candidate.location.split(',')[0].trim())) {
+          return false;
+        }
+      }
+
+      // Filter by industry
+      if (searchParams.industry.length > 0) {
+        if (!searchParams.industry.includes(candidate.industry)) return false;
+      }
+
+      // // // Filter by education level
+      // if (searchParams.educationLevel.length > 0) {
+      //   if (!searchParams.educationLevel.includes(candidate.education)) return false;
+      // }
+
+      // Filter by verification status
+      if (searchParams.verificationStatus.email) {
+        const hasMatchingEmail = candidate.verificationStatus.some(status => status.email);
+        if (!hasMatchingEmail) return false;
+      }
+      if (searchParams.verificationStatus.linkedin) {
+        const hasMatchingLinkedin = candidate.verificationStatus.some(status => status.linkedin);
+        if (!hasMatchingLinkedin) return false;
+      }
+      if (searchParams.verificationStatus.employment) {
+        const hasMatchingEmployment = candidate.verificationStatus.some(status => status.employment);
+        if (!hasMatchingEmployment) return false;
+      }
+
+      // Filter by employment gaps
+      if (searchParams.employmentGaps == candidate.employmentGaps) return false;
+
+      // Filter by graduation year
+      if (candidate.graduationYear < searchParams.graduationYearRange[0] ||
+          candidate.graduationYear > searchParams.graduationYearRange[1]) {
+        return false;
+      }
+
+      // Filter by university
+      if (searchParams.university) {
+        if (!candidate.university.toLowerCase().includes(searchParams.university.toLowerCase())) return false;
+      }
+
+      // Filter by university tier
+      if (searchParams.universityTier.length > 0) {
+        if (!searchParams.universityTier.includes(candidate.universityTier)) return false;
+      }
+
+      return true;
+    });
 
       setSearchState((prev) => ({
         ...prev,

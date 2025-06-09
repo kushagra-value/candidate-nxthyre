@@ -57,7 +57,7 @@ export const TagInput = ({
   return (
     <div className={className}>
       {label && (
-        <label className="block text-sm font-medium text-gray-600 mb-1">
+        <label className="block text-sm font-medium text-gray-600 mb-1 text-lg">
           {label}
         </label>
       )}
@@ -97,7 +97,7 @@ export const TagInput = ({
             onFocus={() => setIsOpen(true)} // Show suggestions on focus
             onBlur={() => setTimeout(() => setIsOpen(false), 200)} // Hide suggestions after a delay
             onKeyDown={handleKeyDown}
-            className="flex-grow border-none p-1 focus:outline-none focus:ring-0 text-gray-900 placeholder:text-gray-400 text-sm"
+            className="flex-grow border-none p-1 focus:outline-none focus:ring-0 text-gray-900 placeholder:text-gray-400 text-md"
             placeholder={placeholder}
           />
           
@@ -139,12 +139,12 @@ export const TagInput = ({
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute z-20 left-0 right-0 mt-2 bg-white shadow-lg rounded-md max-h-48 overflow-auto border border-gray-200"
+              className="absolute z-20 left-0 right-0 mt-2 bg-white shadow-lg rounded-md max-w-50 max-h-48 overflow-auto border border-gray-200"
             >
               {filteredSuggestions.map((suggestion) => (
                 <div
                   key={suggestion}
-                  className="px-4 py-2.5 text-sm cursor-pointer hover:bg-indigo-50 hover:text-indigo-700 text-gray-700 transition-colors duration-150"
+                  className="px-4 py-2.5 text-md cursor-pointer hover:bg-indigo-50 hover:text-indigo-700 text-gray-700 transition-colors duration-150"
                   onClick={() => {
                     addTag(suggestion);
                     setIsOpen(false); // Close suggestions after selecting

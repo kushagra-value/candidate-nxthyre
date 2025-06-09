@@ -42,7 +42,7 @@ export const SavedCandidatesSidebar = () => {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white rounded-lg shadow-md p-4 h-[calc(100vh-7rem)] overflow-y-auto sticky top-28"
+      className="bg-white rounded-lg  p-4 h-[calc(100vh-7rem)] overflow-y-auto sticky top-28"
     >
       
       {/* Favorable Candidates */}

@@ -46,8 +46,21 @@ export interface Candidate {
     date: string;
     description: string;
   }>;
-  noticePeriod: string; // Maps to notice_period
-  currentSalary?: string; // Maps to current_ctc
+  noticePeriod: string; 
+  currentSalary?: string; 
+  expectedCTC?: string; 
+  industry: string; 
+  university: string; 
+  employmentGaps: boolean; 
+  universityTier: string; 
+  graduationYear: number;
+  currentCompany: string;
+  currentTitle: string;
+  verificationStatus: Array<{
+    email: boolean;
+    linkedin: boolean;
+    employment: boolean;
+  }>;
 }
 
 export interface Note {

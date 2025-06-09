@@ -146,8 +146,8 @@ export const FilterSidebar = () => {
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2">Graduation Year</h3>
           <RangeSlider
-            min={2010}
-            max={2024}
+            min={2000}
+            max={2025}
             value={searchParams.graduationYearRange}
             onChange={(value) => updateSearchParams({ graduationYearRange: value })}
           />

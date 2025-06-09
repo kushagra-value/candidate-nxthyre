@@ -56,7 +56,7 @@ const locationOptions: Array<string> = [
 ];
 
 const experienceOptions: string[] = Array.from(
-  { length: 16 },
+  { length: 50 },
   (_, i) => `${i} years`
 );
 
@@ -91,11 +91,14 @@ export const Header = () => {
     >
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row items-center justify-between mb-6">
-          <div className="text-2xl font-bold flex items-center">
-            Recruit Pro
-            <span className="animate-[blink_2s_infinite] ml-1">_</span>
+           <div className="">
+            <img
+              src="/assets/logo2.png"
+              alt="logo"
+              className="w-24 object-fit  "
+            />
           </div>
-          <div className="flex items-center space-x-3 mt-4 md:mt-0">
+          <div className="flex items-center space-x-3">
             <Button
               variant="outline"
               className="border border-white text-white hover:bg-white hover:text-[#1d1e3a] transition-colors duration-300"
@@ -108,25 +111,25 @@ export const Header = () => {
           </div>
         </div>
 
-        <h1 className="text-4xl md:text-5xl font-extrabold pl-2 md:ml-20 mt-8 mb-6 tracking-tight">
-          Find Your Perfect Candidate
+        <h1 className="text-5xl font-bold  ml-20 mt-10 mb-6">
+          Find your perfect candidate
         </h1>
 
         <div className="relative">
-          <div className="md:ml-20 px-4 md:px-0">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-              <div className="md:col-span-3 bg-white rounded-lg flex items-center px-3 py-2 shadow-sm border border-gray-200">
+          <div className="absolute top-3 left-20 flex flex-col items-center">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
+              <div className="md:col-span-4 bg-white rounded-md flex items-center  px-3 shadow-lg">
                 <Search size={18} className="text-gray-400 mr-2" />
                 <TagInput
                   tags={searchParams.skills}
                   onChange={(tags) => updateSearchParams({ skills: tags })}
                   placeholder="Select required skills..."
                   suggestions={skillOptions}
-                  className="w-full focus:outline-none"
+                  className="w-full focus:outline-none "
                 />
               </div>
-              <div className="md:col-span-3 bg-white rounded-lg flex items-center px-3 py-2 shadow-sm border border-gray-200">
-                <MapPin size={18} className="text-gray-400 mr-2" />
+              <div className="md:col-span-3 bg-white rounded-md flex items-center   px-3 shadow-lg">
+                <MapPin size={18} className="text-gray-400" />
                 <TagInput
                   tags={searchParams.location.split(",").filter(Boolean)}
                   onChange={(locations) =>
@@ -137,7 +140,7 @@ export const Header = () => {
                   className="w-full focus:outline-none"
                 />
               </div>
-              <div className="md:col-span-3 bg-white rounded-lg flex items-center px-3 py-2 shadow-sm border border-gray-200">
+              <div className="md:col-span-2 bg-white rounded-md flex items-center  px-3 shadow-lg">
                 <Briefcase size={18} className="text-gray-400 mr-2" />
                 <Dropdown
                   options={experienceOptions}
@@ -147,29 +150,30 @@ export const Header = () => {
                     updateSearchParams({ experienceRange: [0, years] });
                   }}
                   placeholder="Select experience..."
-                  className="w-full focus:outline-none"
+                  className="w-full"
                 />
               </div>
-              <div className="md:col-span-3">
+              <div className="md:col-span-3 bg-white rounded-md flex items-center shadow-lg">
                 <Button
                   size="lg"
                   onClick={executeSearch}
-                  className="w-full h-full bg-[#4f46e5] hover:bg-[#4338ca] text-white font-semibold rounded-lg shadow-md transition-colors duration-300"
+                  className="text-lg text-gray-800 h-full w-full"
                 >
+                  <Search size={20} className=" text-gray-400 mr-2" />
                   Search
                 </Button>
               </div>
             </div>
-            <div className="mt-4">
+            {/* <div className="mt-4">
               <textarea
                 value={searchParams.keywords || ""}
                 onChange={handleKeywordsChange}
                 placeholder="Enter additional keywords or notes..."
                 className="w-full md:w-3/4 bg-white rounded-lg px-3 py-2 shadow-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4f46e5] focus:border-transparent resize-y min-h-[80px] text-gray-800"
               />
-            </div>
+            </div> */}
 
-            <div className="mt-6 flex flex-wrap gap-3 items-center">
+            {/* <div className="mt-6 flex flex-wrap gap-3 items-center">
               <Button
                 variant="outline"
                 size="md"
@@ -210,8 +214,8 @@ export const Header = () => {
                 className="w-44 bg-white/10 text-white border-white/20 hover:bg-gray/20 focus:ring-[#4f46e5] rounded-lg"
                 textSuggestions="text-white"
                 classNameSuggestions="py-2 bg-[#2a2b5a] hover:bg-[#3a3b6a] text-white border-white/10"
-              />
-            </div>
+              /> */}
+            {/* </div> */}
           </div>
         </div>
       </div>

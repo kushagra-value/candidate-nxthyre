@@ -1,13 +1,18 @@
-import React from 'react';
+import React  ,{ useState } from 'react';
 import { CandidateCard } from './CandidateCard';
 import { useSearch } from '../../context/SearchContext';
 import { motion } from 'framer-motion';
+import { NotepadText } from 'lucide-react';
 
 export const CandidateList = () => {
   const { searchState } = useSearch();
   const { results, totalResults, isSearching, hasSearched } = searchState;
+const [isNotesVisible, setIsNotesVisible] = useState(false);
 
-  if (isSearching) {
+  const toggleNotes = () => {
+    setIsNotesVisible(!isNotesVisible);
+  };
+   if (isSearching) {
     return (
       <div className="space-y-4">
         {[...Array(5)].map((_, index) => (
@@ -56,14 +61,42 @@ export const CandidateList = () => {
 
   return (
     <div>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="mb-4 text-sm text-gray-500"
-      >
-        Showing {results.length} of {totalResults} candidates
-      </motion.div>
+      <div className="bg-white shadow-md rounded-lg w-full mx-auto my-6">
+      
+
+      {/* Button that toggles to Notes Input */}
+      <div>
+        {isNotesVisible ? (
+          <div className="relative">
+            <textarea
+              placeholder="Enter additional keywords or notes..."
+              className="w-full p-3 rounded-lg focus:outline-none text-gray-700 placeholder-gray-400 resize-none h-16"
+            />
+          </div>
+        ) : (
+          <button
+            onClick={toggleNotes}
+            className="w-full bg-indigo-50 border-2 border-dashed border-indigo-400 rounded-lg p-4 flex items-center justify-center hover:bg-indigo-100 transition-colors"
+          >
+           <NotepadText />
+           <div className='flex flex-col items-start ml-5'>
+            <span className="text-sm font-semibold text-gray-800">
+               Enter additional keywords or notes
+            </span>
+            <p className="text-xs text-gray-500">
+              We'll find the best candidates, Right People Right away!
+            </p>
+            </div>
+          </button>
+        )}
+      </div>
+       </div>
+      <div className="flex justify-between items-center mb-4">
+        <div className="text-sm text-gray-500">Showing {results.length} of {totalResults} candidates</div>
+        <div className="text-sm text-gray-500">
+          Sort By: <span className="font-medium">Relevance ▼</span>
+        </div>
+      </div>
       
       <div className="space-y-4">
         {results.map((candidate, index) => (
