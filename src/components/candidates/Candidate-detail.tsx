@@ -30,6 +30,7 @@ import {
 import axios from "axios";
 import { useSearch } from "../../context/SearchContext";
 import { Button } from "../ui/Button";
+import { Tag } from "../ui/Tag";
 
 // Interface definitions
 interface Candidate {
@@ -350,8 +351,8 @@ const CandidateDetailPage: React.FC = () => {
             : [],
           awards: Array.isArray(doc.awards) ? doc.awards : [],
           noticePeriod: doc.notice_period || "N/A",
-          currentSalary: doc.current_ctc ? `₹${doc.current_ctc}` : "N/A",
-          expectedCTC: doc.expected_ctc ? `₹${doc.expected_ctc}` : "N/A",
+          currentSalary: doc.current_ctc ? `${doc.current_ctc}` : "N/A",
+          expectedCTC: doc.expected_ctc ? `${doc.expected_ctc}` : "N/A",
           industry: doc.industry || "N/A",
           university: doc.last_graduation_university || "N/A",
           employmentGaps: doc.employment_gaps || false,
@@ -829,11 +830,15 @@ const CandidateDetailPage: React.FC = () => {
                         >
                           <h3 className="text-lg font-semibold mb-3">Skills</h3>
                           <div className="flex flex-wrap gap-2">
-                            {selectedCandidate.skills.map((skill, index) => (
-                              <span key={index} className="tag-primary">
-                                {skill}
-                              </span>
-                            ))}
+                            
+                            <div className="text-xs text-gray-500">
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {selectedCandidate.skills.map((skill) => (
+                                <Tag key={skill} label={skill} size="sm" />
+                              ))}
+                              
+                            </div> 
+                          </div>
                           </div>
                         </motion.div>
                         {Array.isArray(selectedCandidate.experience) &&

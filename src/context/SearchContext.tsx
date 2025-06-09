@@ -129,12 +129,9 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         isVerified: doc.is_email_verified || false,
         isTopTier: doc.last_graduation_university_tier === 'TOP' || false,
         professionalSummary: doc.professionalSummary || '',
-        skills: typeof doc.core_technical_skills_claimed === 'string'
-        ? doc.core_technical_skills_claimed.split(',').map((s: string) => s.trim())
-        : Array.isArray(doc.core_technical_skills_claimed)
-          ? doc.core_technical_skills_claimed.map((s: any) => s.toString().trim())
-          : [],
-
+        skills: doc.core_technical_skills_claimed
+  ? Object.keys(doc.core_technical_skills_claimed)
+  : [],
         experienceDetails: doc.experienceDetails || [],
         education: doc.last_graduation_degree
           ? [{

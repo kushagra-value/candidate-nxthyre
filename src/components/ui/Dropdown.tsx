@@ -49,7 +49,7 @@ export const Dropdown = ({
     <div ref={dropdownRef} className={`relative ${className}`}>
       <button
         type="button"
-        className={`w-full flex justify-between items-center px-3 py-2 rounded-md bg-white text-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${classNameSuggestions}`}
+        className={`w-full flex justify-between items-center px-3 py-2 rounded-lg bg-white text-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${classNameSuggestions}`}
         onClick={toggleDropdown}
       >
         <span className={` ${value ? 'text-gray-600' : 'text-gray-500 '} ${textSuggestions}`}>
@@ -68,7 +68,7 @@ export const Dropdown = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.15 }}
-            className={`absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md py-1 max-h-60 overflow-auto ${dropdownClassName || ''}`}
+            className={`absolute z-10 mt-1 w-full bg-white shadow-lg rounded-lg py-1 max-h-60 overflow-auto ${dropdownClassName || ''}`}
           >
             {options.map((option) => (
               <div

@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Briefcase, IndianRupee, Clock, Bookmark, BadgeCheck, Diamond, Gem } from "lucide-react";
+import { MapPin, Briefcase, IndianRupee, Clock, Bookmark, BadgeCheck, Diamond, Gem, BookmarkCheck, BookmarkPlus } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "../ui/Button";
 import { Tag } from "../ui/Tag";
@@ -27,17 +27,13 @@ export const CandidateCard = ({ candidate, index }: CandidateCardProps) => {
 
   return (
     <Link to={`/candidate/${candidate.id}`} className="block">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: index * 0.1 }}
-        className="  hover:shadow-lg transition-shadow relative"
-      >
-      <div className=" bg-white shadow-md rounded-lg p-4 w-full mx-auto">
-        {/* Header Section */}
 
-        {/* Job Info Section */}
-        <div className="flex items-center mb-4">
+      <div className="border border-gray-200 rounded-md shadow-lg mb-4 hover:bg-gray-50 transition-colors relative">
+      
+
+      <div className="flex p-4">
+        <div className="mr-4">
+<div className="flex items-center mb-4">
             <div className="w-16 h-16 bg-gray-200 rounded-md mr-4 flex items-center justify-center">
             {candidate.profilePicture && candidate.profilePicture !== "N/A" ? (
               <img
@@ -53,8 +49,14 @@ export const CandidateCard = ({ candidate, index }: CandidateCardProps) => {
               </div>
             )}
             </div>
-          <div>
-            <h2 className="text-xl font-bold text-gray-800">
+          </div>
+
+        </div>
+
+        <div className="flex-1">
+          <div className="flex justify-between">
+            <Link to={`/candidate/${candidate.id}`} className="block">
+              <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-600">
               {candidate.name}
               {candidate.isVerified && (
                 <span className=" ml-2 inline-flex items-center  rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
@@ -67,40 +69,33 @@ export const CandidateCard = ({ candidate, index }: CandidateCardProps) => {
                   <Gem className="w-4 h-4" />
                 </span>
               )}
-            </h2>
-            <p className="mt-2 flex items-center gap-2 text-sm text-gray-600">
-              {"  "}
-              {candidate.currentTitle}  • 
-              <span>{candidate.currentCompany}</span>
+              </h3>
+
+              <div className="text-sm text-gray-600 mt-1">
+                {candidate.currentTitle || "N/A"} • {candidate.currentCompany || "N/A"}
+              </div>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-3 mt-4 gap-2">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Experience</p>
+              <p>{candidate.experience ? `${candidate.experience} years` : "N/A"}
             </p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Notice Period</p>
+              <p className="text-sm font-medium">{candidate.noticePeriod ? `${candidate.noticePeriod}` : "N/A"}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Current CTC</p>
+              <p className="text-sm font-medium">{candidate.currentSalary ? `${candidate.currentSalary}` : "N/A"}</p>
+            </div>
           </div>
         </div>
-
-        {/* Details Section */}
-        <div className="ml-20 grid grid-cols-3 mb-2">
-          <div>
-            <p className="text-sm text-gray-500">Experience</p>
-            <p className="text-sm font-medium text-gray-800">
-              <span>{candidate.experience} years</span>
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Notice Period</p>
-            <p className="text-sm font-medium text-gray-800">
-              <span>{candidate.noticePeriod} </span>
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Current CTC</p>
-            <p className="text-sm font-medium text-gray-800">
-              {" "}
-              <span>₹{candidate.currentSalary}</span>
-            </p>
-          </div>
-        </div>
-
-        {/* Footer Section */}
-        <div className="flex justify-between items-center">
+      </div>
+      <div className="px-4 py-3 flex justify-between items-center bg-gray-100">
+        <div className="text-xs text-gray-500">
           <div className="mt-3 flex flex-wrap gap-2">
             {displayedSkills.map((skill) => (
               <Tag key={skill} label={skill} size="sm" />
@@ -110,30 +105,26 @@ export const CandidateCard = ({ candidate, index }: CandidateCardProps) => {
                 +{remainingSkills} more skills
               </span>
             )}
-          </div>
-          <div className="">
-            <Button
-              variant={isSaved ? "primary" : "outline"}
-              leftIcon={
-                <Bookmark
-                  size={16}
-                  className={isSaved ? "text-white" : "text-indigo-500"}
-                />
-              }
-              onClick={(e) => {
+          </div> 
+        </div>
+
+        <button
+          onClick={(e) => {
                 e.preventDefault(); // Prevent navigation when clicking Save button
                 e.stopPropagation(); // Stop event from bubbling to Link
                 handleSave();
               }}
-              disabled={isSaved}
-              className="text-gray-800 mt-3"
-            >
-              {isSaved ? "Saved" : "Save Candidate"}
-            </Button>
-          </div>
-        </div>
+          className="flex items-center text-sm text-gray-600 hover:text-blue-600"
+        >
+          {isSaved ? (
+            <BookmarkCheck className="w-5 h-5 text-blue-600" />
+          ) : (
+            <BookmarkPlus className="w-5 h-5" />
+          )}
+          <span className="ml-2">Save Candidate</span>
+        </button>
       </div>
-      </motion.div>
+    </div>
     </Link>
   );
 };

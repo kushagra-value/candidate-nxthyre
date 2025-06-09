@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { MapPin, Briefcase, Search } from "lucide-react";
+import { MapPin, Briefcase, Search, ChevronDown, Upload } from "lucide-react";
 import { Button } from "./ui/Button";
 import { TagInput } from "./ui/TagInput";
 import { Dropdown } from "./ui/Dropdown";
@@ -87,7 +87,7 @@ export const Header = () => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-gradient-to-r from-[#1d1e3a] to-[#2a2b5a] text-white py-6 px-4 md:px-8 shadow-lg"
+      className="bg-[#080736] text-white py-6 px-4 md:px-8 shadow-lg"
     >
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row items-center justify-between mb-6">
@@ -99,47 +99,48 @@ export const Header = () => {
             />
           </div>
           <div className="flex items-center space-x-3">
-            <Button
-              variant="outline"
-              className="border border-white text-white hover:bg-white hover:text-[#1d1e3a] transition-colors duration-300"
-            >
-              Export Candidates
-            </Button>
-            <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-[#1d1e3a] font-semibold text-lg">
+            <button
+            
+            className="flex items-center space-x-2 text-sm border border-gray-600 rounded-lg px-3 py-1.5 hover:bg-gray-800"
+          >
+            <Upload size={18} />
+            <span>Export Candidates</span>
+          </button>
+             <div className="flex items-center space-x-1 cursor-pointer">
+            <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white font-medium">
               S
             </div>
+            <span className="hidden md:inline">Steve</span>
+            <ChevronDown size={16} />
+          </div>
           </div>
         </div>
-
-        <h1 className="text-5xl font-bold  ml-20 mt-10 mb-6">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-4xl font-bold mb-6 text-white ml-18 mt-20 mb-6">
           Find your perfect candidate
         </h1>
 
-        <div className="relative">
-          <div className="absolute top-3 left-20 flex flex-col items-center">
+        <div className="relative mb-10">
+          <div className="absolute top-3 left-18 flex flex-col items-center">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
-              <div className="md:col-span-4 bg-white rounded-md flex items-center  px-3 shadow-lg">
-                <Search size={18} className="text-gray-400 mr-2" />
-                <TagInput
-                  tags={searchParams.skills}
-                  onChange={(tags) => updateSearchParams({ skills: tags })}
-                  placeholder="Select required skills..."
-                  suggestions={skillOptions}
-                  className="w-full focus:outline-none "
-                />
-              </div>
-              <div className="md:col-span-3 bg-white rounded-md flex items-center   px-3 shadow-lg">
-                <MapPin size={18} className="text-gray-400" />
-                <TagInput
-                  tags={searchParams.location.split(",").filter(Boolean)}
-                  onChange={(locations) =>
-                    updateSearchParams({ location: locations.join(",") })
-                  }
-                  placeholder="Select locations..."
-                  suggestions={locationOptions}
-                  className="w-full focus:outline-none"
-                />
-              </div>
+              <TagInput
+        tags={searchParams.skills}
+        onChange={(tags) => updateSearchParams({ skills: tags })}
+        placeholder="Select required skills..."
+        suggestions={skillOptions}
+        icon={<Search size={18} className="text-gray-400" />}
+        className="md:col-span-4"
+      />
+              <TagInput
+        tags={searchParams.location.split(",").filter(Boolean)}
+        onChange={(locations) =>
+          updateSearchParams({ location: locations.join(",") })
+        }
+        placeholder="Select locations..."
+        suggestions={locationOptions}
+        icon={<MapPin size={18} className="text-gray-400" />}
+        className="md:col-span-3"
+      />
               <div className="md:col-span-2 bg-white rounded-md flex items-center  px-3 shadow-lg">
                 <Briefcase size={18} className="text-gray-400 mr-2" />
                 <Dropdown
@@ -217,6 +218,7 @@ export const Header = () => {
               /> */}
             {/* </div> */}
           </div>
+        </div>
         </div>
       </div>
     </motion.header>
