@@ -8,9 +8,14 @@ from bson.errors import InvalidId
 from typing import Optional, Dict, Any
 from fastapi import HTTPException
 from match_and_rerank import semantic_search_and_rerank
-
+from dotenv import load_dotenv
+import os
+# Load environment variables from .env file
+load_dotenv()
+# MongoDB URI from environment variable 
+MongoDB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017/Resumes")
 app = FastAPI()
-MongoDB_URI = "mongodb+srv://leena:leena123@cluster0.hinzr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+
 
 # Add CORS middleware
 app.add_middleware(
