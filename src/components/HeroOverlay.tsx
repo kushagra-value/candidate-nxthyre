@@ -5,7 +5,7 @@ import { TagInput } from './ui/TagInput';
 import { Dropdown } from './ui/Dropdown';
 import { Button } from './ui/Button';
 import { useSearch } from '../context/SearchContext';
-import { SearchIcon } from 'lucide-react';
+import { MapPin, Search, SearchIcon } from 'lucide-react';
 
 interface HeroOverlayProps {
   onClose: () => void;
@@ -98,25 +98,30 @@ export const HeroOverlay = ({ onClose }: HeroOverlayProps) => {
 
         <div className="space-y-6">
           <div className="hero-input relative z-30">
-            <TagInput
-              label="Required Skills"
-              tags={searchParams.skills}
-              onChange={(tags) => updateSearchParams({ skills: tags })}
-              placeholder="Add skills (e.g., React, Python, AWS)"
-              suggestions={skillOptions}
-              classNameSuggestions='border border-gray-300'
-            />
+           <TagInput
+           label="Required Skills"
+                   tags={searchParams.skills}
+                   onChange={(tags) => updateSearchParams({ skills: tags })}
+                   placeholder="Select required skills..."
+                   suggestions={skillOptions}
+                   icon={<Search size={18} className="text-gray-400" />}
+                   className="md:col-span-4 "
+                 />
           </div>
 
           <div className="hero-input relative z-20">
             <TagInput
-              label="Location"
-              tags={searchParams.location.split(',').filter(Boolean)}
-              onChange={(locations) => updateSearchParams({ location: locations.join(',') })}
-              placeholder="City, State or Remote"
-              suggestions={locationOptions}
-              classNameSuggestions="border border-gray-300"
-            />
+            label='Location'
+        tags={searchParams.location.split(",").filter(Boolean)}
+        onChange={(locations) =>
+          updateSearchParams({ location: locations.join(",") })
+        }
+        placeholder="Select locations..."
+        suggestions={locationOptions}
+        icon={<MapPin size={18} className="text-gray-400" />}
+        className="md:col-span-3"
+      />
+            
           </div>
 
           <div className="hero-input relative z-10">
@@ -129,8 +134,8 @@ export const HeroOverlay = ({ onClose }: HeroOverlayProps) => {
                 updateSearchParams({ experienceRange: [0, years] });
               }}
               placeholder="Select experience..."
-              className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              dropdownClassName="absolute top-full left-0 right-0 z-50 mt-1 max-h-60 overflow-auto bg-white border border-gray-300 rounded-md shadow-lg"
+              className="w-full border border-gray-300 p-2 rounded-md shadow-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 border border-gray-300 "
+              dropdownClassName="absolute top-full left-0 right-0 z-50 mt-1 max-h-60 overflow-auto bg-white border border-gray-300 rounded-md shadow-lg "
             />
           </div>
 

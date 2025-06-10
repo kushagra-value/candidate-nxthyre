@@ -116,12 +116,12 @@ export const Header = () => {
           </div>
         </div>
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold mb-6 text-white ml-18 mt-20 mb-6">
+        <h1 className="text-4xl font-bold mb-6 text-white ml-18 pl-7 mt-20 mb-6">
           Find your perfect candidate
         </h1>
 
         <div className="relative mb-10">
-          <div className="absolute top-3 left-18 flex flex-col items-center">
+          <div className="absolute top-3 pl-7 left-18 flex flex-col items-center">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
               <TagInput
         tags={searchParams.skills}
@@ -141,7 +141,7 @@ export const Header = () => {
         icon={<MapPin size={18} className="text-gray-400" />}
         className="md:col-span-3"
       />
-              <div className="md:col-span-2 bg-white rounded-md flex items-center  px-3 shadow-lg">
+              <div className="border border-gray-300 md:col-span-2 bg-white rounded-md flex items-center  px-3 shadow-lg">
                 <Briefcase size={18} className="text-gray-400 mr-2" />
                 <Dropdown
                   options={experienceOptions}

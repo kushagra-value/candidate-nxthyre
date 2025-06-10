@@ -58,12 +58,14 @@ export const TagInput = ({
     .filter(s => !tags.includes(s));
 
   return (
-    <div className={`w-full ${className}`}>
-      {label && (
+    <>
+{label && (
         <label className="block text-sm font-medium text-gray-600 mb-1 text-lg">
           {label}
         </label>
       )}
+    <div className={` border border-gray-200 rounded-md ${className}`}>
+      
       
       <div 
         className={`
@@ -149,7 +151,7 @@ export const TagInput = ({
               <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-1 text-gray-400 hover:text-gray-600 transition-colors duration-150"
+                className="absolute right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors duration-150"
               >
                 <ChevronDown 
                   size={16} 
@@ -193,6 +195,7 @@ export const TagInput = ({
         )}
       </AnimatePresence>
     </div>
+    </>
   );
 };
 

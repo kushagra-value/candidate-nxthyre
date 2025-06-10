@@ -111,6 +111,8 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         },
       });
 
+      console.log('Search response:', response.data);
+
       const candidates: Candidate[] = response.data.map((doc: any) => ({
         id: doc._id,
         name: doc.name || 'Unknown',

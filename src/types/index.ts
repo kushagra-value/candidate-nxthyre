@@ -4,7 +4,10 @@ export interface Candidate {
   profilePicture: string;
   location: string; // Maps to preferred_location
   contactInfo: { phone: string; email: string };
-  socialLinks: { github?: string; portfolio?: string; linkedin?: string };
+  linkedIn: string; // Maps to linkedin_url
+  github: string; // Maps to github_url
+  portfolio: string; // Maps to portfolio_url
+  kaggle: string; // Maps to kaggle_url
   experience: number; // Maps to total_experience
   isVerified: boolean; // Default false if not in DB
   isTopTier: boolean; // Default false if not in DB

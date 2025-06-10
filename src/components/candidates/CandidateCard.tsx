@@ -116,12 +116,16 @@ export const CandidateCard = ({ candidate, index }: CandidateCardProps) => {
               }}
           className="flex items-center text-sm text-gray-600 hover:text-blue-600"
         >
-          {isSaved ? (
+          {isSaved ? (<>
             <BookmarkCheck className="w-5 h-5 text-blue-600" />
+            <span className="ml-2">Candidate Saved</span></>
           ) : (
+            <>
             <BookmarkPlus className="w-5 h-5" />
+            <span className="ml-2">Save Candidate</span>
+            </>
           )}
-          <span className="ml-2">Save Candidate</span>
+          
         </button>
       </div>
     </div>

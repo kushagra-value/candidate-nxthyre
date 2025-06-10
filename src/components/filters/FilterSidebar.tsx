@@ -10,57 +10,71 @@ import { useSearch } from '../../context/SearchContext';
 import { industries, educationLevels, universityTiers, salaryRanges } from '../../data/mockData';
 
 export const FilterSidebar = () => {
-  const { searchParams, updateSearchParams } = useSearch();
+  // const { searchParams, updateSearchParams } = useSearch();
 
-  const handleIndustryChange = (industry: string) => {
-    const updated = searchParams.industry.includes(industry)
-      ? searchParams.industry.filter(i => i !== industry)
-      : [...searchParams.industry, industry];
-    updateSearchParams({ industry: updated });
-  };
+  // const handleIndustryChange = (industry: string) => {
+  //   const updated = searchParams.industry.includes(industry)
+  //     ? searchParams.industry.filter(i => i !== industry)
+  //     : [...searchParams.industry, industry];
+  //   updateSearchParams({ industry: updated });
+  // };
 
-  const handleEducationChange = (education: string) => {
-    const updated = searchParams.educationLevel.includes(education)
-      ? searchParams.educationLevel.filter(e => e !== education)
-      : [...searchParams.educationLevel, education];
-    updateSearchParams({ educationLevel: updated });
-  };
+  // const handleEducationChange = (education: string) => {
+  //   const updated = searchParams.educationLevel.includes(education)
+  //     ? searchParams.educationLevel.filter(e => e !== education)
+  //     : [...searchParams.educationLevel, education];
+  //   updateSearchParams({ educationLevel: updated });
+  // };
 
-  const handleVerificationChange = (type: keyof typeof searchParams.verificationStatus, value: boolean) => {
-    updateSearchParams({
-      verificationStatus: {
-        ...searchParams.verificationStatus,
-        [type]: value
-      }
-    });
-  };
+  // const handleVerificationChange = (type: keyof typeof searchParams.verificationStatus, value: boolean) => {
+  //   updateSearchParams({
+  //     verificationStatus: {
+  //       ...searchParams.verificationStatus,
+  //       [type]: value
+  //     }
+  //   });
+  // };
 
-  const handleUniversityTierChange = (tier: string) => {
-    const updated = searchParams.universityTier.includes(tier)
-      ? searchParams.universityTier.filter(t => t !== tier)
-      : [...searchParams.universityTier, tier];
-    updateSearchParams({ universityTier: updated });
-  };
+  // const handleUniversityTierChange = (tier: string) => {
+  //   const updated = searchParams.universityTier.includes(tier)
+  //     ? searchParams.universityTier.filter(t => t !== tier)
+  //     : [...searchParams.universityTier, tier];
+  //   updateSearchParams({ universityTier: updated });
+  // };
 
-  const handleSalaryRangeChange = (range: string) => {
-    const updated = searchParams.currentSalaryRange.includes(range)
-      ? searchParams.currentSalaryRange.filter(r => r !== range)
-      : [...searchParams.currentSalaryRange, range];
-    updateSearchParams({ currentSalaryRange: updated });
-  };
+  // const handleSalaryRangeChange = (range: string) => {
+  //   const updated = searchParams.currentSalaryRange.includes(range)
+  //     ? searchParams.currentSalaryRange.filter(r => r !== range)
+  //     : [...searchParams.currentSalaryRange, range];
+  //   updateSearchParams({ currentSalaryRange: updated });
+  // };
 
   return (
     <motion.aside
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white rounded-lg shadow-md p-4 h-[calc(100vh-7rem)] overflow-y-auto sticky top-28"
+      className="bg-white rounded-lg shadow-md p-4 h-[calc(100vh-7rem)] overflow-y-auto hide-scrollbar sticky top-28 " style={{
+              scrollbarWidth: 'none', // Firefox
+              msOverflowStyle: 'none', // IE/Edge
+            }}
     >
       <h2 className="text-lg font-semibold text-gray-800 mb-4">Filters</h2>
+
+      <p className='flex gap-2 bg-white rounded-lg shadow-md px-1 py-4 animate-pulse'>More Filters Coming Soon</p>
+
+      <div className="space-y-4">
+        {[...Array(10)].map((_, index) => (
+          <div key={index} className="flex gap-2 bg-white rounded-lg shadow-md px-1 py-4 animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-1/6"></div>  
+            <div className="h-4 bg-gray-200 rounded w-5/6"></div>  
+          </div>
+        ))}
+      </div>
       
       <div className="space-y-6">
         {/* Industry */}
-        <div>
+        {/* <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2">Industry</h3>
           <div className="space-y-2 max-h-36 overflow-y-auto pr-2">
             {industries.map((industry) => (
@@ -72,10 +86,10 @@ export const FilterSidebar = () => {
               />
             ))}
           </div>
-        </div>
+        </div> */}
         
         {/* Education Level */}
-        <div>
+        {/* <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2">Education Level</h3>
           <div className="space-y-2">
             {educationLevels.map((education) => (
@@ -87,10 +101,10 @@ export const FilterSidebar = () => {
               />
             ))}
           </div>
-        </div>
+        </div> */}
         
         {/* Verification Status */}
-        <div>
+        {/* <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2">Verification Status</h3>
           <div className="space-y-2">
             <Checkbox
@@ -118,10 +132,10 @@ export const FilterSidebar = () => {
               onChange={(e) => handleVerificationChange('education', e.target.checked)}
             />
           </div>
-        </div>
+        </div> */}
         
         {/* Employment Gaps */}
-        <div>
+        {/* <div>
           <Button
             variant={searchParams.employmentGaps ? 'primary' : 'outline'}
             size="sm"
@@ -130,20 +144,20 @@ export const FilterSidebar = () => {
           >
             No Employment Gaps
           </Button>
-        </div>
+        </div> */}
         
         {/* Skills */}
-        <div>
+        {/* <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2">Skills</h3>
           <TagInput
             tags={searchParams.skills}
             onChange={(tags) => updateSearchParams({ skills: tags })}
             placeholder="Add skills..."
           />
-        </div>
+        </div> */}
         
         {/* Graduation Year */}
-        <div>
+        {/* <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2">Graduation Year</h3>
           <RangeSlider
             min={2000}
@@ -151,20 +165,20 @@ export const FilterSidebar = () => {
             value={searchParams.graduationYearRange}
             onChange={(value) => updateSearchParams({ graduationYearRange: value })}
           />
-        </div>
+        </div> */}
         
         {/* University */}
-        <div>
+        {/* <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2">University</h3>
           <Input
             placeholder="Search university..."
             value={searchParams.university}
             onChange={(e) => updateSearchParams({ university: e.target.value })}
           />
-        </div>
+        </div> */}
         
         {/* University Tier */}
-        <div>
+        {/* <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2">University Tier</h3>
           <div className="flex flex-wrap gap-2">
             {universityTiers.map((tier) => (
@@ -178,10 +192,10 @@ export const FilterSidebar = () => {
               </Button>
             ))}
           </div>
-        </div>
+        </div> */}
         
         {/* Certifications, Awards, Social Proof */}
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <Button
             variant={searchParams.hasCertifications ? 'primary' : 'outline'}
             size="sm"
@@ -208,10 +222,10 @@ export const FilterSidebar = () => {
           >
             Has Social Proof
           </Button>
-        </div>
+        </div> */}
         
         {/* Current Salary */}
-        <div>
+        {/* <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2">Current Salary</h3>
           <div className="space-y-2">
             {salaryRanges.map((range) => (
@@ -223,10 +237,10 @@ export const FilterSidebar = () => {
               />
             ))}
           </div>
-        </div>
+        </div> */}
         
         {/* Expected CTC */}
-        <div>
+        {/* <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2">Expected CTC</h3>
           <div className="space-y-2">
             {salaryRanges.map((range) => (
@@ -243,8 +257,16 @@ export const FilterSidebar = () => {
               />
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
     </motion.aside>
   );
 };
+
+const style = document.createElement('style');
+style.textContent = `
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+`;
+document.head.appendChild(style);
