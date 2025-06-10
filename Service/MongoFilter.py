@@ -7,12 +7,14 @@ from bson import ObjectId
 from bson.errors import InvalidId
 from typing import Optional, Dict, Any
 from fastapi import HTTPException
+from pymongo.errors import PyMongoError
+
 
 class MongoFilter:
     def __init__(self, uri: str):
         self.client = MongoClient(uri)
         self.db_name = "Resumes"
-        self.collection_name = "Resumes"
+        self.collection_name = "Resumes1"
         self.collection = None
 
     def connect(self) -> None:
@@ -53,10 +55,51 @@ class MongoFilter:
             # Build query dynamically for filtered data
             query = {}
 
-            # Add skills filter if provided
+            # Skills filter - check if any of the requested skills exist as keys in core_technical_skills_claimed
             if filters.get("skills"):
-                skill_pattern = r"(?i)\b(" + "|".join(re.escape(skill.strip()) for skill in filters["skills"]) + r")\b"
-                query["core_technical_skills_claimed"] = {"$regex": skill_pattern}
+                match_conditions = {}
+                skills_conditions = []
+                for skill in filters["skills"]:
+                    # Create case-insensitive field existence check
+                    skill_key_pattern = f"^{re.escape(skill)}$"
+                    skills_conditions.append({
+                        f"core_technical_skills_claimed": {
+                            "$regex": skill_key_pattern,
+                            "$options": "i"
+                        }
+                    })
+                    
+                # Alternative approach: Check if any skill key matches (case-insensitive)
+                # This uses $expr with $anyElementTrue for object keys
+                skills_or_conditions = []
+                for skill in filters["skills"]:
+                    # Check each skill against all keys in core_technical_skills_claimed
+                    skills_or_conditions.append({
+                        "$expr": {
+                            "$gt": [
+                                {
+                                    "$size": {
+                                        "$filter": {
+                                            "input": {"$objectToArray": "$core_technical_skills_claimed"},
+                                            "cond": {
+                                                "$regexMatch": {
+                                                    "input": "$$this.k",
+                                                    "regex": f"^{re.escape(skill)}$",
+                                                    "options": "i"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                0
+                            ]
+                        }
+                    })
+                
+                if skills_or_conditions:
+                    match_conditions["$or"] = skills_or_conditions
+                    # Merge match_conditions into query
+                    query.update(match_conditions)
 
             # Location filter
             if filters.get("locations"):
@@ -121,16 +164,18 @@ class MongoFilter:
             raise RuntimeError("Database not connected. Call connect() first.")
         
         try:
-            # Convert string to ObjectId
             object_id = ObjectId(resume_id)
             resume = self.collection.find_one({"_id": object_id})
             if resume:
                 resume['_id'] = str(resume['_id'])  # Convert ObjectId to string
-            return resume
+                return resume
+            return None
         except InvalidId:
-            # Handle invalid ObjectId format
             print(f"Invalid ObjectId format: {resume_id}")
             return None
+        except PyMongoError as e:
+            print(f"MongoDB error fetching data by ID: {e}")
+            raise HTTPException(status_code=500, detail=f"MongoDB error: {str(e)}")
         except Exception as e:
-            print(f"Error fetching data by ID: {e}")
-            raise
+            print(f"Unexpected error fetching data by ID: {e}")
+            raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
