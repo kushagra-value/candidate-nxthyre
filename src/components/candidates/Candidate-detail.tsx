@@ -286,7 +286,7 @@
         }
         try {
           console.log("Fetching candidate data for ID:", id);
-          const response = await axios.get(`http://localhost:8000/resume/${id}`);
+          const response = await axios.get(`https://api.nxthyre.com/nxtapi/resume/${id}`);
           console.log("Candidate data fetched successfully:", response.data);
           const doc = response.data;
           console.log("Candidate document:", doc);

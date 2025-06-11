@@ -105,7 +105,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         keywords: searchParams.keywords || undefined,
       };
 
-      const response = await axios.post('http://localhost:8000/filter-resumes/', filterInput, {
+      const response = await axios.post('https://api.nxthyre.com/nxtapi/filter-resumes/', filterInput, {
         headers: {
           'Content-Type': 'application/json',
         },
