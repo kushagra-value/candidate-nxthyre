@@ -94,6 +94,9 @@ interface Candidate {
   graduationYear: number;
   currentCompany: string;
   currentTitle: string;
+  resumeParseDate: string;
+  specialization: string;
+  remoteExperience: string;
   verificationStatus: Array<{
     email: boolean;
     linkedin: boolean;
@@ -300,6 +303,9 @@ const CandidateDetailPage: React.FC = () => {
           graduationYear: doc.last_graduation_year || 0,
           currentCompany: doc.current_company || "N/A",
           currentTitle: doc.current_title || "N/A",
+          specialization: doc.specialization || "N/A",
+          remoteExperience: doc.remote_experience || "N/A",
+          resumeParseDate: doc.resume_parsed_date || "N/A",
           verificationStatus: [
             {
               email: doc.is_email_verified || false,
@@ -640,155 +646,208 @@ const CandidateDetailPage: React.FC = () => {
               }}
             >
               <div className="bg-white rounded-lg p-4 w-full mx-auto">
-                <div className="flex items-center mb-4">
-                  <div className="w-20 h-20 bg-gray-200 rounded-md mr-4 flex items-center justify-center">
-                    <motion.div
-                      className="flex-shrink-0 relative md:mb-0"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                    >
-                      <img
-                        src={selectedCandidate.profileImage}
-                        alt={selectedCandidate.name}
-                        className="w-20 h-20 object-cover rounded-lg border-2 border-indigo-100"
-                      />
-                    </motion.div>
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-800">
-                      {selectedCandidate.name}
-                      {selectedCandidate.isVerified && (
-                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Verified
-                        </span>
-                      )}
-                      {selectedCandidate.isTopTier && (
-                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                          Top Tier
-                        </span>
-                      )}
-                    </h2>
-                    <p className="flex flex-col justify-center items-left gap-2 text-sm text-gray-600">
-                      <span>
-                        {selectedCandidate.currentTitle} •{" "}
-                        {selectedCandidate.currentCompany}
-                      </span>
-                      <button
-                        onClick={() =>
-                          navigator.clipboard.writeText(
-                            selectedCandidate.contactInfo.email
-                          )
-                        }
-                        className="ml-1 text-secondary-500 hover:text-secondary-700"
-                      >
-                        <span className="flex gap-2 items-center">
-                          <Copy size={14} />
-                          {selectedCandidate.contactInfo.email}
-                        </span>
-                        <span className="flex gap-2 items-center">
-                          <Copy size={14} />
-                          {selectedCandidate.contactInfo.phone}
-                        </span>
-                      </button>
-                    </p>
-                  </div>
-                  <div className="flex gap-2 ml-64 mb-10">
-                    {selectedCandidate.github !== "NA" && (
-                      <button
-                        onClick={() =>
-                          handleLinkClick(selectedCandidate.github)
-                        }
-                        className="bg-secondary-100 p-2 rounded-full text-secondary-700 hover:bg-secondary-200"
-                        aria-label="Visit LinkedIn profile"
-                      >
-                        <Github size={18} />
-                      </button>
-                    )}
-                    {selectedCandidate.portfolio !== "NA" && (
-                      <button
-                        onClick={() =>
-                          handleLinkClick(selectedCandidate.portfolio)
-                        }
-                        className="bg-secondary-100 p-2 rounded-full text-secondary-700 hover:bg-secondary-200"
-                        aria-label="Visit LinkedIn profile"
-                      >
-                        <Globe size={18} />
-                      </button>
-                    )}
-                    {selectedCandidate.linkedIn !== "NA" && (
-                      <button
-                        onClick={() =>
-                          handleLinkClick(selectedCandidate.linkedIn)
-                        }
-                        className="bg-secondary-100 p-2 rounded-full text-secondary-700 hover:bg-secondary-200"
-                        aria-label="Visit LinkedIn profile"
-                      >
-                        <Linkedin size={18} />
-                      </button>
-                    )}
-                    {selectedCandidate.kaggle !== "NA" && (
-                      <button
-                        onClick={() =>
-                          handleLinkClick(selectedCandidate.kaggle)
-                        }
-                        className="bg-secondary-100 p-2 rounded-full text-secondary-700 hover:bg-secondary-200"
-                        aria-label="Visit LinkedIn profile"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          x="0px"
-                          y="0px"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 32 32"
-                        >
-                          <path d="M 10.351562 4 C 10.117563 4 10 4.1165625 10 4.3515625 L 10 27.644531 C 10 27.878531 10.116563 27.996094 10.351562 27.996094 L 12.648438 27.996094 C 12.882437 27.996094 13.001953 27.879531 13.001953 27.644531 L 13.001953 22.808594 L 14.810547 21.085938 L 20.048828 27.75 C 20.190828 27.915 20.354922 28 20.544922 28 L 23.716797 28 C 23.882797 28 23.977 27.952422 24 27.857422 L 23.933594 27.498047 L 17.023438 18.910156 L 23.650391 12.498047 C 23.773391 12.370047 23.730438 12 23.398438 12 L 20.117188 12 C 19.951187 12 19.785141 12.085953 19.619141 12.251953 L 13 18.974609 L 13 4.3515625 C 13 4.1165625 12.883437 4 12.648438 4 L 10.351562 4 z"></path>
-                        </svg>{" "}
-                      </button>
-                    )}
-                    <button className="bg-secondary-100 p-2 rounded-full text-secondary-700 hover:bg-secondary-200">
-                      <FileText size={18} />
-                    </button>
-                  </div>
-                </div>
+  <div className="flex items-center mb-4">
+    <div className="w-20 h-20 bg-gray-200 rounded-md mr-4 flex items-center justify-center">
+      <motion.div
+        className="flex-shrink-0 relative md:mb-0"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+      >
+        <img
+          src={selectedCandidate.profileImage}
+          alt={selectedCandidate.name}
+          className="w-20 h-20 object-cover rounded-lg border-2 border-indigo-100"
+        />
+      </motion.div>
+    </div>
+    <div>
+      <h2 className="text-xl font-bold text-gray-800">
+        {selectedCandidate.name}
+        {selectedCandidate.isVerified && (
+          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            Verified
+          </span>
+        )}
+        {selectedCandidate.isTopTier && (
+          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+            Top Tier
+          </span>
+        )}
+      </h2>
+      <p className="flex flex-col justify-center items-left gap-2 text-sm text-gray-600">
+        <span>
+          {selectedCandidate.currentTitle} • {selectedCandidate.currentCompany}
+        </span>
+        <button
+          onClick={() =>
+            navigator.clipboard.writeText(selectedCandidate.contactInfo.email)
+          }
+          className="ml-1 text-secondary-500 hover:text-secondary-700"
+        >
+          <span className="flex gap-2 items-center">
+            <Copy size={14} />
+            {selectedCandidate.contactInfo.email}
+          </span>
+        </button>
+        <button
+          onClick={() =>
+            navigator.clipboard.writeText(selectedCandidate.contactInfo.phone)
+          }
+          className="ml-1 text-secondary-500 hover:text-secondary-700"
+        >
+          <span className="flex gap-2 items-center">
+            <Copy size={14} />
+            {selectedCandidate.contactInfo.phone}
+          </span>
+        </button>
+      </p>
+    </div>
+    <div className="flex gap-2 ml-auto">
+      <button
+        onClick={() =>
+          selectedCandidate.github !== "NA" &&
+          handleLinkClick(selectedCandidate.github)
+        }
+        className={`p-2 rounded-full ${
+          selectedCandidate.github !== "NA"
+            ? "bg-secondary-300 text-secondary-700 hover:bg-secondary-200"
+            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+        }`}
+        aria-label="Visit GitHub profile"
+        disabled={selectedCandidate.github === "NA"}
+      >
+        <Github size={18} />
+      </button>
+      <button
+        onClick={() =>
+          selectedCandidate.portfolio !== "NA" &&
+          handleLinkClick(selectedCandidate.portfolio)
+        }
+        className={`p-2 rounded-full ${
+          selectedCandidate.portfolio !== "NA"
+            ? "bg-secondary-300 text-secondary-700 hover:bg-secondary-200"
+            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+        }`}
+        aria-label="Visit portfolio website"
+        disabled={selectedCandidate.portfolio === "NA"}
+      >
+        <Globe size={18} />
+      </button>
+      <button
+        onClick={() =>
+          selectedCandidate.linkedIn !== "NA" &&
+          handleLinkClick(selectedCandidate.linkedIn)
+        }
+        className={`p-2 rounded-full ${
+          selectedCandidate.linkedIn !== "NA"
+            ? "bg-secondary-300 text-secondary-700 hover:bg-secondary-200"
+            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+        }`}
+        aria-label="Visit LinkedIn profile"
+        disabled={selectedCandidate.linkedIn === "NA"}
+      >
+        <Linkedin size={18} />
+      </button>
+      <button
+        onClick={() =>
+          selectedCandidate.kaggle !== "NA" &&
+          handleLinkClick(selectedCandidate.kaggle)
+        }
+        className={`p-2 rounded-full ${
+          selectedCandidate.kaggle !== "NA"
+            ? "bg-secondary-300 text-secondary-700 hover:bg-secondary-200"
+            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+        }`}
+        aria-label="Visit Kaggle profile"
+        disabled={selectedCandidate.kaggle === "NA"}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          x="0px"
+          y="0px"
+          width="20"
+          height="20"
+          viewBox="0 0 32 32"
+          className="fill-current text-secondary-400"
+        >
+          <path d="M 10.351562 4 C 10.117563 4 10 4.1165625 10 4.3515625 L 10 27.644531 C 10 27.878531 10.116563 27.996094 10.351562 27.996094 L 12.648438 27.996094 C 12.882437 27.996094 13.001953 27.879531 13.001953 27.644531 L 13.001953 22.808594 L 14.810547 21.085938 L 20.048828 27.75 C 20.190828 27.915 20.354922 28 20.544922 28 L 23.716797 28 C 23.882797 28 23.977 27.952422 24 27.857422 L 23.933594 27.498047 L 17.023438 18.910156 L 23.650391 12.498047 C 23.773391 12.370047 23.730438 12 23.398438 12 L 20.117188 12 C 19.951187 12 19.785141 12.085953 19.619141 12.251953 L 13 18.974609 L 13 4.3515625 C 13 4.1165625 12.883437 4 12.648438 4 L 10.351562 4 z"></path>
+        </svg>
+      </button>
+      <button className="bg-secondary-300 p-2 rounded-full text-secondary-700 hover:bg-secondary-200">
+        <FileText size={18} />
+      </button>
+    </div>
+  </div>
 
-                <div className="grid grid-cols-4">
-                  <div>
-                    <p className="text-sm text-gray-500">Experience</p>
-                    <p className="text-sm font-medium text-gray-800">
-                      <span>{selectedCandidate.experienceYears} years</span>
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Notice Period</p>
-                    <p className="text-sm font-medium text-gray-800">
-                      <span>{selectedCandidate.noticePeriod}</span>
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Current CTC</p>
-                    <p className="text-sm font-medium text-gray-800">
-                      <span>{selectedCandidate.currentSalary}</span>
-                    </p>
-                  </div>
-                  <div className="">
-                    <Button
-                      variant={isSaved ? "primary" : "outline"}
-                      leftIcon={
-                        <Bookmark
-                          size={16}
-                          className={isSaved ? "text-white" : "text-indigo-500"}
-                        />
-                      }
-                      onClick={() => setIsModalOpen(true)}
-                      disabled={isSaved}
-                      className="text-gray-800 mt-2"
-                    >
-                      {isSaved ? "Saved" : "Save Candidate"}
-                    </Button>
-                  </div>
-                </div>
-              </div>
+  <div className="ml-20 pl-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-2">
+    <div>
+      <p className="text-xs text-gray-500">Experience</p>
+      <p className="text-sm font-medium text-gray-800">
+        {selectedCandidate.experienceYears} years
+      </p>
+    </div>
+    <div>
+      <p className="text-xs text-gray-500">Notice Period</p>
+      <p className="text-sm font-medium text-gray-800">
+        {selectedCandidate.noticePeriod}
+      </p>
+    </div>
+    <div>
+      <p className="text-xs text-gray-500">Current CTC</p>
+      <p className="text-sm font-medium text-gray-800">
+        {selectedCandidate.currentSalary}
+      </p>
+    </div>
+    <div>
+      <p className="text-xs text-gray-500">Specialization</p>
+      <p className="text-sm font-medium text-gray-800">
+        {selectedCandidate.specialization || "N/A"}
+      </p>
+    </div>
+    <div>
+      <p className="text-xs text-gray-500">Remote Experience</p>
+      <p className="text-sm font-medium text-gray-800">
+        {selectedCandidate.remoteExperience ? "Yes" : "No"}
+      </p>
+    </div>
+    <div>
+      <p className="text-xs text-gray-500">Employment Gaps</p>
+      <p className="text-sm font-medium text-gray-800">
+        {selectedCandidate.employmentGaps ? "Yes" : "No"}
+      </p>
+    </div>
+    <div>
+      <p className="text-xs text-gray-500">Industry</p>
+      <p className="text-sm font-medium text-gray-800">
+        {selectedCandidate.industry || "N/A"}
+      </p>
+    </div>
+    <div>
+      <p className="text-xs text-gray-500">Resume Parsed</p>
+      <p className="text-sm font-medium text-gray-800">
+        {selectedCandidate.resumeParseDate
+          ? new Date(selectedCandidate.resumeParseDate).toLocaleDateString()
+          : "N/A"}
+      </p>
+    </div>
+    <div className="col-span-2 sm:col-span-1">
+      <Button
+        variant={isSaved ? "primary" : "outline"}
+        leftIcon={
+          <Bookmark
+            size={16}
+            className={isSaved ? "text-white" : "text-indigo-500"}
+          />
+        }
+        onClick={() => setIsModalOpen(true)}
+        disabled={isSaved}
+        className="text-gray-800 mt-2 w-full"
+      >
+        {isSaved ? "Saved" : "Save Candidate"}
+      </Button>
+    </div>
+  </div>
+</div>
             </motion.div>
 
             {/* ProfileTabs */}
