@@ -180,7 +180,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         );
         if (!hasAllSkills) return false;
       }
-
+      
       // // Filter by location
       if (searchParams.location) {
         const locations = searchParams.location.split(',').filter(Boolean);
