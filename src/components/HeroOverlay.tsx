@@ -12,17 +12,51 @@ interface HeroOverlayProps {
 }
 
 const skillOptions = [
-  'Machine Learning', 'Deep Learning', 'Natural Language Processing', 'Computer Vision',
-  'Neural Networks', 'TensorFlow', 'PyTorch', 'Scikit-learn', 'Data Mining',
-  'Big Data Analytics', 'Reinforcement Learning', 'AI Ethics', 'Robotics',
-  'Speech Recognition', 'Image Processing', 'Predictive Analytics',
-  'AI Model Deployment', 'MLOps', 'AI Infrastructure', 'AI Research'
+  "NET", "AEM", "AI", "API", "AWS", "AWS EC2", "AWS-CWI", "Agentic Ai",
+  "Agentic Workflows", "Agile", "Agile Methodology", "Aiml", "Algorithms",
+  "Analytics", "Api Automation Testing", "Appium", "Application Development Senior Analyst",
+  "Architectural Design", "Artificial Intelligence", "Automated Testing", "BDD Cucumber",
+  "Bert", "Browserstack", "Business Intelligence", "C#", "CSS", "Cassandra",
+  "Chatbot", "Chatbot Development", "Chatbots", "Ci/Cd", "Classification",
+  "Cloud", "Cluster Analysis", "Collections", "Computer Vision", "Conversational Ai",
+  "Data Analytics", "Data Driven Testing", "Data Engineering", "Data Science",
+  "Data Scientist", "Data Structures", "Data Visualization", "Deep Learning",
+  "Deployment", "Dialogflow", "Django", "Docker", "Flask", "Flask Web Framework",
+  "Full Stack Developer/Software Developer", "GCP", "GCP Cloud", "GIT", "Gcp Cloud",
+  "Gen AI", "GenAI", "Genesys IVR", "Genrative Ai", "Git", "Github", "Google Cloud Services",
+  "HTML", "Html And Css", "IBM Watson Analytics", "Image Processing", "Information Retrieval",
+  "Insight Generation", "Integration Testing", "IntelliJ Idea", "JIRA", "JScript", "JUnit",
+  "Java", "Java Technologies", "Javascript", "Jenkins", "Jira", "Jupyter Notebook",
+  "Keras", "Kibana", "Kubernetes", "LLM", "LLM's", "Langchain", "Large Language Model",
+  "Lead Engineer", "Llama", "Llm", "Lstm", "Machine Learning", "Matplotlib", "Maven",
+  "Mechanical Engineering", "Medical Devices", "Mobile Automation", "MySQL", "NLP",
+  "NX-Open", "Natural Language Processing", "Neural Networks", "Nextjs", "Nltk",
+  "Node.js", "Numpy", "OCR", "OOPS", "OpenAI", "Opencv", "Palantir", "Panda",
+  "Pandas", "Playwright", "Postman", "Power BI", "Power Platform", "Predictive Analytics",
+  "Predictive Modeling", "Problem Solving", "Project Management", "Promp", "Pycharm",
+  "Pytest", "Python", "Python Data Analytics", "Python Development", "Pytorch", "RAG",
+  "Random Forest", "Redis", "Reinforcement Learning", "Requirement Gathering", "Rest Assured",
+  "Retrieval Augmented Generation", "Root Cause Analysis", "SQL", "Scikit-Learn", "Scipy",
+  "Seaborn", "Selenium", "Software Development", "Software Engineering", "Solution Design",
+  "Spring Boot", "Statistical Analysis", "Tableau", "Tensorflow", "Testng", "Testng Framework",
+  "Text Analytics", "Text Mining", "TypeScript", "VBA Excel", "Vertex Ai", "Visual Basic",
+  "Visual Studio", "Xgboost", "Yolo", "agentic ai", "agile", "algorithms", "analysis",
+  "artificial intelligence", "aws lambda", "awsbedrock", "azure", "bitbucket",
+  "chatbot development", "ci cd pipeline", "conversation", "crew ai", "css",
+  "data analytics", "data mining", "data science", "datascientist", "dbms",
+  "deep learning", "dialogflow", "docker", "docker container", "gcp developer",
+  "gdf", "gen ai", "generative ai", "github", "html", "hugging phase", "huggingface",
+  "java", "javascript", "jenkins", "langchain", "langgraph", "langsmith", "llm",
+  "machine learning", "microservices", "mlops", "mongodb", "mysql database",
+  "natural language processing", "neural networks", "nlp", "node.js", "python",
+  "rag", "react.js", "redis", "sql", "terraform"
 ];
 
 const locationOptions = [
-  'Bangalore', 'Mumbai', 'Delhi', 'Hyderabad', 'Chennai', 'Pune', 'Kolkata',
+  'Bangalore', 'Mumbai', 'Hyderabad', 'Chennai', 'Pune', 'Kolkata',
   'Ahmedabad', 'Gurgaon', 'Noida', 'Chandigarh', 'Kochi', 'Thiruvananthapuram',
-  'Coimbatore', 'Jaipur', 'Indore', 'Bhubaneswar', 'Lucknow', 'Nagpur', 'Vizag'
+  'Coimbatore', 'Jaipur', 'Indore', 'Bhubaneswar', 'Lucknow', 'Nagpur', 'Vizag',
+  "Delhi / NCR", "Goa", "Gurugram", "Kolkata", "Remote"
 ];
 
 const experienceOptions = Array.from({ length: 16 }, (_, i) => `${i} years`);
