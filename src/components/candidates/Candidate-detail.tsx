@@ -31,6 +31,12 @@ import axios from "axios";
 import { useSearch } from "../../context/SearchContext";
 import { Button } from "../ui/Button";
 import { Tag } from "../ui/Tag";
+import { createClient } from "@supabase/supabase-js";
+
+// Initialize Supabase client
+const supabaseUrl = "https://nmxgivyyrilsnibobrbu.supabase.co"; // Replace with your Supabase project URL
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5teGdpdnl5cmlsc25pYm9icmJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY2MDM2NTQsImV4cCI6MjA2MjE3OTY1NH0.IGQXM9Ym1_0twcN7im5iutSfYTbNE_TzqnvhOgoo_l0"; // Replace with your Supabase anon key
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Interface definitions
 interface Candidate {
@@ -102,6 +108,7 @@ interface Candidate {
     linkedin: boolean;
     employment: boolean;
   }>;
+  resume_local_path?: string; // Added for resume path
 }
 
 interface Note {
@@ -153,20 +160,15 @@ interface SavedList {
 
 // Mock data
 const mockNotes: Note[] = [];
-
 const mockTemplates: EmailTemplate[] = [];
-
 const mockEmails: Email[] = [];
-
 const mockInterviews: Interview[] = [];
 
 const CandidateDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { saveCandidate, unsaveCandidate, searchState } = useSearch();
-  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(
-    null
-  );
+  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [savedLists, setSavedLists] = useState<SavedList[]>([
     { id: "1", name: "Frontend Developers", candidates: [] },
@@ -184,16 +186,53 @@ const CandidateDetailPage: React.FC = () => {
   const [showAllBeginner, setShowAllBeginner] = useState(false);
   const [emailSubject, setEmailSubject] = useState<string>("");
   const [emailContent, setEmailContent] = useState<string>("");
-  const [isTemplateDropdownOpen, setIsTemplateDropdownOpen] =
-    useState<boolean>(false);
+  const [isTemplateDropdownOpen, setIsTemplateDropdownOpen] = useState<boolean>(false);
   const [interviews] = useState<Interview[]>(mockInterviews);
   const [showFeedback, setShowFeedback] = useState<Record<string, boolean>>({});
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "emails" | "interviews"
-  >("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "emails" | "interviews">("overview");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const isSaved = searchState.savedCandidates.some((c) => c.id === id);
+
+  // Function to extract filename and fetch resume from Supabase
+  const handleResumeClick = async (resumePath: string | undefined) => {
+    if (!resumePath) {
+      alert("No resume available for this candidate.");
+      return;
+    }
+
+    try {
+      // Extract base filename (e.g., "output/Akash__Londhe_A2E5BA2B4A.pdf" -> "Akash__Londhe_A2E5BA2B4A")
+      // or "imap_downloads/Dhirendra_Singh_2_pdf.pdf" -> "Dhirendra_Singh_2_pdf")
+      const fileName = resumePath
+        .replace(/^(output|imap_downloads)\//, "") // Remove "output/" or "imap_downloads/" prefix
+        .replace(/\.pdf$/, ""); // Remove ".pdf" extension
+
+      // Append .pdf for Supabase storage
+      const storageFilePath = fileName;
+
+      // Fetch public URL from Supabase storage
+      const { data } = await supabase.storage
+        .from("candidate-resumes") // Replace with your Supabase storage bucket name
+        .getPublicUrl(storageFilePath);
+      
+      if (data?.publicUrl) {
+      // Handle binary/octet-stream MIME type
+      const response = await fetch(data.publicUrl);
+      const blob = await response.blob();
+      const pdfBlob = new Blob([blob], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(pdfBlob);
+      window.open(url, "_blank", "noopener,noreferrer");
+      window.URL.revokeObjectURL(url); // Clean up
+    } else {
+      throw new Error("Resume URL not found.");
+    }
+
+    } catch (err: any) {
+      console.error("Error fetching resume:", err);
+      alert("Failed to load resume. Please try again later.");
+    }
+  };
 
   // Fetch candidate data
   useEffect(() => {
@@ -313,6 +352,7 @@ const CandidateDetailPage: React.FC = () => {
               employment: doc.is_employment_verified || false,
             },
           ],
+          resume_local_path: doc.resume_local_path || "", // Map resume_local_path
         };
 
         console.log("Mapped candidate:", mappedCandidate);
@@ -574,22 +614,6 @@ const CandidateDetailPage: React.FC = () => {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-secondary-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-          <div className="text-6xl mb-4">⏳</div>
-          <h2 className="text-2xl font-semibold mb-4">
-            Loading Candidate Details
-          </h2>
-          <p className="text-secondary-600 mb-6">
-            Please wait while we fetch the candidate information...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   if (error || !selectedCandidate) {
     return (
       <div className="min-h-screen bg-secondary-50 flex items-center justify-center">
@@ -646,208 +670,217 @@ const CandidateDetailPage: React.FC = () => {
               }}
             >
               <div className="bg-white rounded-lg p-4 w-full mx-auto">
-  <div className="flex items-center mb-4">
-    <div className="w-20 h-20 bg-gray-200 rounded-md mr-4 flex items-center justify-center">
-      <motion.div
-        className="flex-shrink-0 relative md:mb-0"
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-      >
-        <img
-          src={selectedCandidate.profileImage}
-          alt={selectedCandidate.name}
-          className="w-20 h-20 object-cover rounded-lg border-2 border-indigo-100"
-        />
-      </motion.div>
-    </div>
-    <div>
-      <h2 className="text-xl font-bold text-gray-800">
-        {selectedCandidate.name}
-        {selectedCandidate.isVerified && (
-          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            Verified
-          </span>
-        )}
-        {selectedCandidate.isTopTier && (
-          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-            Top Tier
-          </span>
-        )}
-      </h2>
-      <p className="flex flex-col justify-center items-left gap-2 text-sm text-gray-600">
-        <span>
-          {selectedCandidate.currentTitle} • {selectedCandidate.currentCompany}
-        </span>
-        <button
-          onClick={() =>
-            navigator.clipboard.writeText(selectedCandidate.contactInfo.email)
-          }
-          className="ml-1 text-secondary-500 hover:text-secondary-700"
-        >
-          <span className="flex gap-2 items-center">
-            <Copy size={14} />
-            {selectedCandidate.contactInfo.email}
-          </span>
-        </button>
-        <button
-          onClick={() =>
-            navigator.clipboard.writeText(selectedCandidate.contactInfo.phone)
-          }
-          className="ml-1 text-secondary-500 hover:text-secondary-700"
-        >
-          <span className="flex gap-2 items-center">
-            <Copy size={14} />
-            {selectedCandidate.contactInfo.phone}
-          </span>
-        </button>
-      </p>
-    </div>
-    <div className="flex gap-2 ml-auto">
-      <button
-        onClick={() =>
-          selectedCandidate.github !== "NA" &&
-          handleLinkClick(selectedCandidate.github)
-        }
-        className={`p-2 rounded-full ${
-          selectedCandidate.github !== "NA"
-            ? "bg-secondary-300 text-secondary-700 hover:bg-secondary-200"
-            : "bg-gray-100 text-gray-400 cursor-not-allowed"
-        }`}
-        aria-label="Visit GitHub profile"
-        disabled={selectedCandidate.github === "NA"}
-      >
-        <Github size={18} />
-      </button>
-      <button
-        onClick={() =>
-          selectedCandidate.portfolio !== "NA" &&
-          handleLinkClick(selectedCandidate.portfolio)
-        }
-        className={`p-2 rounded-full ${
-          selectedCandidate.portfolio !== "NA"
-            ? "bg-secondary-300 text-secondary-700 hover:bg-secondary-200"
-            : "bg-gray-100 text-gray-400 cursor-not-allowed"
-        }`}
-        aria-label="Visit portfolio website"
-        disabled={selectedCandidate.portfolio === "NA"}
-      >
-        <Globe size={18} />
-      </button>
-      <button
-        onClick={() =>
-          selectedCandidate.linkedIn !== "NA" &&
-          handleLinkClick(selectedCandidate.linkedIn)
-        }
-        className={`p-2 rounded-full ${
-          selectedCandidate.linkedIn !== "NA"
-            ? "bg-secondary-300 text-secondary-700 hover:bg-secondary-200"
-            : "bg-gray-100 text-gray-400 cursor-not-allowed"
-        }`}
-        aria-label="Visit LinkedIn profile"
-        disabled={selectedCandidate.linkedIn === "NA"}
-      >
-        <Linkedin size={18} />
-      </button>
-      <button
-        onClick={() =>
-          selectedCandidate.kaggle !== "NA" &&
-          handleLinkClick(selectedCandidate.kaggle)
-        }
-        className={`p-2 rounded-full ${
-          selectedCandidate.kaggle !== "NA"
-            ? "bg-secondary-300 text-secondary-700 hover:bg-secondary-200"
-            : "bg-gray-100 text-gray-400 cursor-not-allowed"
-        }`}
-        aria-label="Visit Kaggle profile"
-        disabled={selectedCandidate.kaggle === "NA"}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          x="0px"
-          y="0px"
-          width="20"
-          height="20"
-          viewBox="0 0 32 32"
-          className="fill-current text-secondary-400"
-        >
-          <path d="M 10.351562 4 C 10.117563 4 10 4.1165625 10 4.3515625 L 10 27.644531 C 10 27.878531 10.116563 27.996094 10.351562 27.996094 L 12.648438 27.996094 C 12.882437 27.996094 13.001953 27.879531 13.001953 27.644531 L 13.001953 22.808594 L 14.810547 21.085938 L 20.048828 27.75 C 20.190828 27.915 20.354922 28 20.544922 28 L 23.716797 28 C 23.882797 28 23.977 27.952422 24 27.857422 L 23.933594 27.498047 L 17.023438 18.910156 L 23.650391 12.498047 C 23.773391 12.370047 23.730438 12 23.398438 12 L 20.117188 12 C 19.951187 12 19.785141 12.085953 19.619141 12.251953 L 13 18.974609 L 13 4.3515625 C 13 4.1165625 12.883437 4 12.648438 4 L 10.351562 4 z"></path>
-        </svg>
-      </button>
-      <button className="bg-secondary-300 p-2 rounded-full text-secondary-700 hover:bg-secondary-200">
-        <FileText size={18} />
-      </button>
-    </div>
-  </div>
+                <div className="flex items-center mb-4">
+                  <div className="w-20 h-20 bg-gray-200 rounded-md mr-4 flex items-center justify-center">
+                    <motion.div
+                      className="flex-shrink-0 relative md:mb-0"
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                    >
+                      <img
+                        src={selectedCandidate.profileImage}
+                        alt={selectedCandidate.name}
+                        className="w-20 h-20 object-cover rounded-lg border-2 border-indigo-100"
+                      />
+                    </motion.div>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-800">
+                      {selectedCandidate.name}
+                      {selectedCandidate.isVerified && (
+                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Verified
+                        </span>
+                      )}
+                      {selectedCandidate.isTopTier && (
+                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                          Top Tier
+                        </span>
+                      )}
+                    </h2>
+                    <p className="flex flex-col justify-center items-left gap-2 text-sm text-gray-600">
+                      <span>
+                        {selectedCandidate.currentTitle} • {selectedCandidate.currentCompany}
+                      </span>
+                      <button
+                        onClick={() =>
+                          navigator.clipboard.writeText(selectedCandidate.contactInfo.email)
+                        }
+                        className="ml-1 text-secondary-500 hover:text-secondary-700"
+                      >
+                        <span className="flex gap-2 items-center">
+                          <Copy size={14} />
+                          {selectedCandidate.contactInfo.email}
+                        </span>
+                      </button>
+                      <button
+                        onClick={() =>
+                          navigator.clipboard.writeText(selectedCandidate.contactInfo.phone)
+                        }
+                        className="ml-1 text-secondary-500 hover:text-secondary-700"
+                      >
+                        <span className="flex gap-2 items-center">
+                          <Copy size={14} />
+                          {selectedCandidate.contactInfo.phone}
+                        </span>
+                      </button>
+                    </p>
+                  </div>
+                  <div className="flex gap-2 ml-auto">
+                    <button
+                      onClick={() =>
+                        selectedCandidate.github !== "NA" &&
+                        handleLinkClick(selectedCandidate.github)
+                      }
+                      className={`p-2 rounded-full ${
+                        selectedCandidate.github !== "NA"
+                          ? "bg-secondary-300 text-secondary-700 hover:bg-secondary-200"
+                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      }`}
+                      aria-label="Visit GitHub profile"
+                      disabled={selectedCandidate.github === "NA"}
+                    >
+                      <Github size={18} />
+                    </button>
+                    <button
+                      onClick={() =>
+                        selectedCandidate.portfolio !== "NA" &&
+                        handleLinkClick(selectedCandidate.portfolio)
+                      }
+                      className={`p-2 rounded-full ${
+                        selectedCandidate.portfolio !== "NA"
+                          ? "bg-secondary-300 text-secondary-700 hover:bg-secondary-200"
+                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      }`}
+                      aria-label="Visit portfolio website"
+                      disabled={selectedCandidate.portfolio === "NA"}
+                    >
+                      <Globe size={18} />
+                    </button>
+                    <button
+                      onClick={() =>
+                        selectedCandidate.linkedIn !== "NA" &&
+                        handleLinkClick(selectedCandidate.linkedIn)
+                      }
+                      className={`p-2 rounded-full ${
+                        selectedCandidate.linkedIn !== "NA"
+                          ? "bg-secondary-300 text-secondary-700 hover:bg-secondary-200"
+                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      }`}
+                      aria-label="Visit LinkedIn profile"
+                      disabled={selectedCandidate.linkedIn === "NA"}
+                    >
+                      <Linkedin size={18} />
+                    </button>
+                    <button
+                      onClick={() =>
+                        selectedCandidate.kaggle !== "NA" &&
+                        handleLinkClick(selectedCandidate.kaggle)
+                      }
+                      className={`p-2 rounded-full ${
+                        selectedCandidate.kaggle !== "NA"
+                          ? "bg-secondary-300 text-secondary-700 hover:bg-secondary-200"
+                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      }`}
+                      aria-label="Visit Kaggle profile"
+                      disabled={selectedCandidate.kaggle === "NA"}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        x="0px"
+                        y="0px"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 32 32"
+                        className="fill-current text-secondary-400"
+                      >
+                        <path d="M 10.351562 4 C 10.117563 4 10 4.1165625 10 4.3515625 L 10 27.644531 C 10 27.878531 10.116563 27.996094 10.351562 27.996094 L 12.648438 27.996094 C 12.882437 27.996094 13.001953 27.879531 13.001953 27.644531 L 13.001953 22.808594 L 14.810547 21.085938 L 20.048828 27.75 C 20.190828 27.915 20.354922 28 20.544922 28 L 23.716797 28 C 23.882797 28 23.977 27.952422 24 27.857422 L 23.933594 27.498047 L 17.023438 18.910156 L 23.650391 12.498047 C 23.773391 12.370047 23.730438 12 23.398438 12 L 20.117188 12 C 19.951187 12 19.785141 12.085953 19.619141 12.251953 L 13 18.974609 L 13 4.3515625 C 13 4.1165625 12.883437 4 12.648438 4 L 10.351562 4 z"></path>
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => handleResumeClick(selectedCandidate.resume_local_path)}
+                      className={`p-2 rounded-full ${
+                        selectedCandidate.resume_local_path
+                          ? "bg-secondary-300 text-secondary-700 hover:bg-secondary-200"
+                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      }`}
+                      aria-label="View resume"
+                      disabled={!selectedCandidate.resume_local_path}
+                    >
+                      <FileText size={18} />
+                    </button>
+                  </div>
+                </div>
 
-  <div className="ml-20 pl-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-2">
-    <div>
-      <p className="text-xs text-gray-500">Experience</p>
-      <p className="text-sm font-medium text-gray-800">
-        {selectedCandidate.experienceYears} years
-      </p>
-    </div>
-    <div>
-      <p className="text-xs text-gray-500">Notice Period</p>
-      <p className="text-sm font-medium text-gray-800">
-        {selectedCandidate.noticePeriod}
-      </p>
-    </div>
-    <div>
-      <p className="text-xs text-gray-500">Current CTC</p>
-      <p className="text-sm font-medium text-gray-800">
-        {selectedCandidate.currentSalary}
-      </p>
-    </div>
-    <div>
-      <p className="text-xs text-gray-500">Specialization</p>
-      <p className="text-sm font-medium text-gray-800">
-        {selectedCandidate.specialization || "N/A"}
-      </p>
-    </div>
-    <div>
-      <p className="text-xs text-gray-500">Remote Experience</p>
-      <p className="text-sm font-medium text-gray-800">
-        {selectedCandidate.remoteExperience ? "Yes" : "No"}
-      </p>
-    </div>
-    <div>
-      <p className="text-xs text-gray-500">Employment Gaps</p>
-      <p className="text-sm font-medium text-gray-800">
-        {selectedCandidate.employmentGaps ? "Yes" : "No"}
-      </p>
-    </div>
-    <div>
-      <p className="text-xs text-gray-500">Industry</p>
-      <p className="text-sm font-medium text-gray-800">
-        {selectedCandidate.industry || "N/A"}
-      </p>
-    </div>
-    <div>
-      <p className="text-xs text-gray-500">Resume Parsed</p>
-      <p className="text-sm font-medium text-gray-800">
-        {selectedCandidate.resumeParseDate
-          ? new Date(selectedCandidate.resumeParseDate).toLocaleDateString()
-          : "N/A"}
-      </p>
-    </div>
-    <div className="col-span-2 sm:col-span-1">
-      <Button
-        variant={isSaved ? "primary" : "outline"}
-        leftIcon={
-          <Bookmark
-            size={16}
-            className={isSaved ? "text-white" : "text-indigo-500"}
-          />
-        }
-        onClick={() => setIsModalOpen(true)}
-        disabled={isSaved}
-        className="text-gray-800 mt-2 w-full"
-      >
-        {isSaved ? "Saved" : "Save Candidate"}
-      </Button>
-    </div>
-  </div>
-</div>
+                <div className="ml-20 pl-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-2">
+                  <div>
+                    <p className="text-xs text-gray-500">Experience</p>
+                    <p className="text-sm font-medium text-gray-800">
+                      {selectedCandidate.experienceYears} years
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Notice Period</p>
+                    <p className="text-sm font-medium text-gray-800">
+                      {selectedCandidate.noticePeriod}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Current CTC</p>
+                    <p className="text-sm font-medium text-gray-800">
+                      {selectedCandidate.currentSalary}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Specialization</p>
+                    <p className="text-sm font-medium text-gray-800">
+                      {selectedCandidate.specialization || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Remote Experience</p>
+                    <p className="text-sm font-medium text-gray-800">
+                      {selectedCandidate.remoteExperience ? "Yes" : "No"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Employment Gaps</p>
+                    <p className="text-sm font-medium text-gray-800">
+                      {selectedCandidate.employmentGaps ? "Yes" : "No"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Industry</p>
+                    <p className="text-sm font-medium text-gray-800">
+                      {selectedCandidate.industry || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Resume Parsed</p>
+                    <p className="text-sm font-medium text-gray-800">
+                      {selectedCandidate.resumeParseDate
+                        ? new Date(selectedCandidate.resumeParseDate).toLocaleDateString()
+                        : "N/A"}
+                    </p>
+                  </div>
+                  <div className="col-span-2 sm:col-span-1">
+                    <Button
+                      variant={isSaved ? "primary" : "outline"}
+                      leftIcon={
+                        <Bookmark
+                          size={16}
+                          className={isSaved ? "text-white" : "text-indigo-500"}
+                        />
+                      }
+                      onClick={() => setIsModalOpen(true)}
+                      disabled={isSaved}
+                      className="text-gray-800 mt-2 w-full"
+                    >
+                      {isSaved ? "Saved" : "Save Candidate"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </motion.div>
 
             {/* ProfileTabs */}
@@ -1203,7 +1236,6 @@ const CandidateDetailPage: React.FC = () => {
                         <motion.div
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3 }}
                         >
                           <h3 className="text-lg font-semibold mb-3">
                             Email History
@@ -1215,7 +1247,7 @@ const CandidateDetailPage: React.FC = () => {
                                 className={`p-4 rounded-lg ${
                                   email.isIncoming
                                     ? "bg-secondary-50"
-                                    : "bg-primary-50"
+                                    : "bg-primary-100"
                                 }`}
                               >
                                 <div className="flex justify-between items-start">
@@ -1247,7 +1279,6 @@ const CandidateDetailPage: React.FC = () => {
                         <motion.div
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, delay: 0.1 }}
                         >
                           <h3 className="text-lg font-semibold mb-3">
                             Compose New Email
@@ -1327,7 +1358,6 @@ const CandidateDetailPage: React.FC = () => {
                           className="flex justify-between items-center"
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3 }}
                         >
                           <h3 className="text-lg font-semibold">
                             Upcoming Interviews
@@ -1341,7 +1371,6 @@ const CandidateDetailPage: React.FC = () => {
                           className="space-y-4"
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, delay: 0.1 }}
                         >
                           {interviews.map((interview) => (
                             <motion.div
@@ -1387,7 +1416,7 @@ const CandidateDetailPage: React.FC = () => {
                                 </div>
                               </div>
                               {interview.notes && (
-                                <div className="mt-3 pt-3 border-t border-secondary-100">
+                                <div className="mt-3 pt-3 border-t border-secondary-200">
                                   <div className="text-sm font-medium text-secondary-700 mb-1">
                                     Notes
                                   </div>
@@ -1397,7 +1426,7 @@ const CandidateDetailPage: React.FC = () => {
                                 </div>
                               )}
                               {interview.feedback && (
-                                <div className="mt-3 pt-3 border-t border-secondary-100">
+                                <div className="mt-3 pt-3 border-t border-secondary-200">
                                   <button
                                     className="text-sm font-medium text-primary-600 flex items-center"
                                     onClick={() => toggleFeedback(interview.id)}
@@ -1408,7 +1437,7 @@ const CandidateDetailPage: React.FC = () => {
                                     <svg
                                       className={`ml-1 w-4 h-4 transform transition-transform ${
                                         showFeedback[interview.id]
-                                          ? "rotate-180"
+                                          ? "rotate-180)"
                                           : ""
                                       }`}
                                       viewBox="0 0 24 24"
@@ -1498,7 +1527,7 @@ const CandidateDetailPage: React.FC = () => {
 
           {/* NotesPanel */}
           <motion.div
-            className="bg-white rounded-lg shadow-card overflow-hidden"
+            className="bg-white rounded-lg shadow-card overflow-hidden p-6"
             initial={{ opacity: 0, x: 20 }}
             animate={{
               opacity: 1,
@@ -1563,7 +1592,7 @@ const CandidateDetailPage: React.FC = () => {
                     >
                       <div className="flex justify-between items-start">
                         <div className="text-xs text-secondary-500 mb-1">
-                          {note.timestamp} · {note.author}
+                          {note.timestamp} • {note.author}
                         </div>
                         <div className="flex space-x-1">
                           <button
@@ -1608,7 +1637,7 @@ const CandidateDetailPage: React.FC = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50 p-4">
           <motion.div
-            className="bg-white rounded-xl p-6 w-full max-w-xl max-h-[55vh] h-full overflow-y-auto shadow-2xl"
+            className="bg-white rounded-lg p-6 w-full max-w-xl max-h-[55vh] h-full overflow-y-auto shadow-lg"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -1632,7 +1661,7 @@ const CandidateDetailPage: React.FC = () => {
                   htmlFor="list-select"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Select Already Existing List
+                  Select an Existing List
                 </label>
                 <select
                   id="list-select"
@@ -1660,7 +1689,7 @@ const CandidateDetailPage: React.FC = () => {
                   id="new-list"
                   type="text"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                  placeholder="DevOps Candidates"
+                  placeholder="New List Name"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && e.currentTarget.value.trim()) {
                       createNewList(
@@ -1673,7 +1702,7 @@ const CandidateDetailPage: React.FC = () => {
                   }}
                 />
               </div>
-              <div className="pt-10 flex justify-end gap-3">
+              <div className="pt-4 flex justify-end gap-3">
                 <button
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                   onClick={() => setIsModalOpen(false)}
